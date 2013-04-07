@@ -12,9 +12,10 @@ loc_checkin_table=xlsfile.add_sheet('loc_checkin_count')
 user_checkin_table=xlsfile.add_sheet('user_checkin_count')
 locr_table=xlsfile.add_sheet('locr_count')
 
-f=open("d:\\totalCheckins.txt",'r')
-trainf=open("d:\\trainCheckins.txt",'w+')
-testf=open("d:\\testCheckins.txt",'w+')
+f=open("d:\\filter2.txt",'r')
+trainf=open("d:\\trainfilter2.txt",'w+')
+testf=open("d:\\testfilter2.txt",'w+')
+
 
 
 locr={0:{0:0}}
@@ -48,7 +49,7 @@ while True:
     userid=int(arr[0])
     locidstr=arr[4]
     locid=int(locidstr[:-2])
-    
+
     #统计每个签到的时间分布
     if tm.tm_year==2010 and tm.tm_mon>=10:
         testf.write(newline)
@@ -57,6 +58,8 @@ while True:
         trainf.write(newline)
         trainc=trainc+1
 
+print "TrainCount:",trainc,"   TestCount:",trainc
+'''
     #统计每个用户的签到次数
     
     if userckins.has_key(userid):
@@ -83,7 +86,7 @@ while True:
         else:
             locr[locid]={lastlocid:1}
            ## print "nokey",locr[locid][lastlocid]
-            
+          
     lastuserid=arr[0]
     lasttime=newtime
     lastlocid=locid
@@ -102,6 +105,30 @@ while True:
 
 print 'trainset:',trainc
 print 'testSet:',testc
+
+
+
+##统计数据集矩阵密度
+
+allsize=len(userckins)*len(locckins)
+checkinsize=0
+for uuid in user_loc.keys():
+    checkinsize=checkinsize+len(user_loc[uuid])
+print 'raw_density: ',float(checkinsize)/allsize,' =checkinsize: ',checkinsize,' *allsize: ',allsize
+
+
+#位置关系统计
+print '位置关系统计',locr_max
+locrcountlist=[0]*1000
+for flid in locr.keys():
+    for slid in locr[flid].keys():
+        locrcount=locr[flid][slid]
+        if(locrcount>=1000): locrcount=999
+        locrcountlist[locrcount]=locrcountlist[locrcount]+1
+for i in range(0,1000):
+    locr_table.write(i,0,i)
+    locr_table.write(i,1,locrcountlist[i])
+xlsfile.save('d:\\data1.xls')
 
 #统计在某一区间的签到数量的位置数量，R为range，N为取样点数量
 print '统计在某一区间的签到数量的位置数量'
@@ -132,26 +159,8 @@ for i in range(0,N):
     tmpstr=i
     user_checkin_table.write(i,0,tmpstr)
     user_checkin_table.write(i,1,userckincountlist[i])
-
-##统计数据集矩阵密度
-allsize=len(userckins)*len(locckins)
-checkinsize=0
-for uuid in user_loc.keys():
-    checkinsize=checkinsize+len(user_loc[uuid])
-print 'raw_density: ',float(checkinsize)/allsize,' =checkinsize: ',checkinsize,' *allsize: ',allsize
+'''
 
 
-#位置关系统计
-print '位置关系统计',locr_max
-locrcountlist=[0]*1000
-for flid in locr.keys():
-    for slid in locr[flid].keys():
-        locrcount=locr[flid][slid]
-        if(locrcount>=1000): locrcount=999
-        locrcountlist[locrcount]=locrcountlist[locrcount]+1
-for i in range(0,1000):
-    locr_table.write(i,0,i)
-    locr_table.write(i,1,locrcountlist[i])
-xlsfile.save('d:\\data1.xls')
 print 'end!'
 
