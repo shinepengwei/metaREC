@@ -136,7 +136,7 @@ FeatureMap calFeature(int fromId,const char *route,int length){
             weight=iter1->second->getWeight();
         }
         float feat1=weight/allweight1;
-        cout<<feat1;
+        //cout<<feat1;
         Item * item2=::getItemPtrbyId(id2,route[1],NOALLOWNEW);
         EdgeMap *edgelist2=item2->getToItemE(route[2]);
         int allweight2=item2->getAllWeight(route[2]);
@@ -279,10 +279,11 @@ void readTrainFriendData(){
 
         int fuid=atoi(result[0].data());
         int suid=atoi(result[1].data());
-        ::addFriend(fuid,suid);
+        addFriend(fuid,suid);
     }
 }
-void addNegativeCase(int fromid,FeatureMap * metaFea,ofstream &outFile){
+int addNegativeCase(int fromid,FeatureMap * metaFea,ofstream &outFile,int count){
+    int necount=0;
     //ofstream outFile=outFilePtr;
     for(int i=0;i<5;i++){
         float feat[5];
@@ -301,17 +302,27 @@ void addNegativeCase(int fromid,FeatureMap * metaFea,ofstream &outFile){
                     FeatureMap::iterator iter2=meF2->find(toid);
                     if(iter2!=meF2->end()){
                         feat[j]=iter2->second;
+                        meF2->erase(iter2);
+                    }else{
+                        feat[j]=0;
                     }
                 }
             }
-            outFile<<"negative"<<fromid<<","<<toid;
-            for(int x=0;x<5;x++){
-                outFile<<feat[x]<<",";
+            if((rand()%100)==1){
+                outFile<<fromid<<","<<toid<<",";
+                for(int x=0;x<5;x++){
+                    outFile<<feat[x]<<",";
+                }
+                outFile<<"0"<<endl;
+                necount++;
+                if(necount==count){
+                    return necount;
+                }
+
             }
-            outFile<<endl;
         }
-       
     }
+    return necount;
 }
 
 void readTestData(){
@@ -326,18 +337,24 @@ void readTestData(){
     char route3[5]="UUUL";
     char route4[5]="ULUL";
 
-    int allCount=0;
-    int metaPathInCount[5];
+    int allCount=0;//所有的签到记录数量
+    int metaPathInCount[5];//属于元路径到达的签到数量
     for(int i=0;i<5;i++) metaPathInCount[i]=0;
-    int reCount=0;
-    int noCount=0;
+    int reCount=0;//重复的签到数量
+    int noCount=0;//不属于元路径可到到的位置的签到数量
+    int nullCount=0;//用户或者位置节点不属于原始数据集的签到数量
+
+    int positiveCount=0;//正例数量
+    int negativeCount=0;//放入数据集负例数量
+    int trueNeCount=0;//真实的全部负例数量
 
     int i=0;
     cout<<"读取test文件"<<endl;
+    int lastPoCount=0;//上一个userid的正例
     while(true){
         i++;
+        //if(i==1000) break;//just for test
         if(i%10000==0) cout<<i<<endl;
-
         if(testfile.eof()){
             break;
         }
@@ -347,10 +364,16 @@ void readTestData(){
         vector<std::string> result=split(str);
         int userid=atoi(result[0].data());
         int locid=atoi(result[4].data());
+        User * u=::getUserPtrbyId(userid,NOALLOWNEW);
+        Location * l=::getLocationPtrbyId(locid,NOALLOWNEW);
+        if(u==NULL||l==NULL){//如果用户或者位置不存在
+            nullCount++;
+            continue;
+        }
         if(userid!=lastuserid){
             //把上一个User中的剩余签到作为负例
             if(lastuserid!=-1){
-                ::addNegativeCase(lastuserid,metaFeature,outfile);
+                negativeCount+=::addNegativeCase(lastuserid,metaFeature,outfile,lastPoCount);
             }
             metaFeature[0]=::calFeature(userid,route0,2);
             metaFeature[1]=::calFeature(userid,route1,2);
@@ -358,10 +381,7 @@ void readTestData(){
             metaFeature[3]=::calFeature(userid,route3,3);
             metaFeature[4]=::calFeature(userid,route4,3);
             lastuserid=userid;
-        }
-        User * u=::getUserPtrbyId(userid,NOALLOWNEW);
-        if(u==NULL){//如果用户不存在
-            continue;
+            lastPoCount=0;
         }
         EdgeMap *emp=u->getToLocE();
         if(emp->find(locid)!=emp->end()){//如果用户已经访问过该位置
@@ -370,37 +390,46 @@ void readTestData(){
         }
         int flag=0;
         FeatureMap::iterator miter;
-        //添加一个正例
-        outfile<<userid<<","<<locid;
+        float tmpFeature[5];
         for(int i=0;i<5;i++){
             miter=metaFeature[i].find(locid);
             if(miter!=metaFeature[i].end()){
+                tmpFeature[i]=miter->second;
                 metaPathInCount[i]++;
-                outfile<<","<<miter->second;
                 flag=1;
+                metaFeature[i].erase(miter);
             }else{
-                outfile<<",0";
+                 tmpFeature[i]=0;
             }
         }
-        outfile<<",1"<<endl;
         if(flag==0) noCount++;
+        else{//添加一个正例
+            outfile<<userid<<","<<locid;
+            for(int i=0;i<5;i++)
+                outfile<<","<<tmpFeature[i];
+            outfile<<",1"<<endl;
+            positiveCount++;
+            lastPoCount++;
+        }
     }
     //将最后的一个Userid的负例插入
-    ::addNegativeCase(lastuserid,metaFeature,outfile);
-    cout<<"AllCount:"<<allCount<<endl;
+    negativeCount+=::addNegativeCase(lastuserid,metaFeature,outfile,trueNeCount);
+    cout<<"所有的签到记录数量AllCount:"<<allCount<<endl;
     for(int i=0;i<5;i++)
-        cout<<"metaPathInCount["<<i<<"]:"<<metaPathInCount[i]<<endl;
-    cout<<"ReCount:"<<reCount<<endl;
-    cout<<"noCount:"<<noCount<<endl;
+        cout<<"属于元路径到达的签到数量metaPathInCount["<<i<<"]:"<<metaPathInCount[i]<<endl;
+    cout<<"重复的签到数量ReCount:"<<reCount<<endl;
+    cout<<"不属于元路径可到到的位置的签到数量noCount:"<<noCount<<endl;
+    cout<<"正例数量："<<positiveCount<<endl;
+    cout<<"输出负例数量："<<negativeCount<<endl;
+    cout<<"负例数量trueNeCount："<<trueNeCount<<endl;
+    cout<<"用户或者位置节点不属于原始数据集的签到数量"<<nullCount<<endl;
 }
 void main()
 {
-   
      /*
     ifstream checkinfile("d:\\testdata.txt");
     ifstream friendfile("d:\\testfriend.txt");
     ifstream testfile("d:\\testtestdata.txt");*/
-
 
     readTrainCheckinData();
     readTrainFriendData();

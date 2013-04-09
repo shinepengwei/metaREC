@@ -1,0 +1,112 @@
+=== Run information ===
+
+Scheme:weka.classifiers.functions.LinearRegression -S 0 -R 1.0E-8
+Relation:     feature-weka.filters.unsupervised.attribute.Remove-R1-2
+Instances:    218696
+Attributes:   6
+              metaone
+              metatwo
+              metathree
+              metafour
+              metafive
+              label
+Test mode:10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+
+Linear Regression Model
+
+label =
+
+     -0.7151 * metaone +
+      3.8988 * metatwo +
+     10.533  * metathree +
+     68.9953 * metafour +
+     32.7086 * metafive +
+      0.3087
+
+Time taken to build model: 0.59 seconds
+
+=== Cross-validation ===
+=== Summary ===
+
+Correlation coefficient                  0.2052
+Mean absolute error                      0.422 
+Root mean squared error                  0.4578
+Relative absolute error                 96.4214 %
+Root relative squared error             97.8764 %
+Total Number of Instances           218696     
+
+
+
+=== Run information ===
+
+Scheme:weka.classifiers.trees.J48 -C 0.25 -M 2
+Relation:     feature-weka.filters.unsupervised.attribute.Remove-R1-2
+Instances:    218696
+Attributes:   6
+              metaone
+              metatwo
+              metathree
+              metafour
+              metafive
+              label
+Test mode:10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+J48 pruned tree
+------------------
+
+metaone <= 0.002585
+|   metathree <= 0.002691
+|   |   metatwo <= 0.002319
+|   |   |   metafive <= 0.002515
+|   |   |   |   metafour <= 0.001124: 0 (207788.0/60042.0)
+|   |   |   |   metafour > 0.001124: 1 (336.0/19.0)
+|   |   |   metafive > 0.002515: 1 (727.0/19.0)
+|   |   metatwo > 0.002319: 1 (2992.0/77.0)
+|   metathree > 0.002691: 1 (2113.0/43.0)
+metaone > 0.002585: 1 (4740.0/69.0)
+
+Number of Leaves  : 	6
+
+Size of the tree : 	11
+
+
+Time taken to build model: 2575.65 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances      158799               72.6118 %
+Incorrectly Classified Instances     59897               27.3882 %
+Kappa statistic                          0.1984
+Mean absolute error                      0.3908
+Root mean squared error                  0.442 
+Relative absolute error                 89.3035 %
+Root relative squared error             94.4989 %
+Total Number of Instances           218696     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.157     0.002      0.978     0.157     0.27       0.578    1
+                 0.998     0.843      0.712     0.998     0.831      0.578    0
+Weighted Avg.    0.726     0.571      0.798     0.726     0.65       0.578
+
+=== Confusion Matrix ===
+
+      a      b   <-- classified as
+  11070  59653 |      a = 1
+    244 147729 |      b = 0
+
+
+
+
+
+
+
+
+
