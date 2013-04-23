@@ -261,7 +261,6 @@ void readTrainCheckinData(){
     //cout<<endl<<endl<<endl;cout<<endl<<endl<<endl;
 }
 void readTrainFriendData(){
-    
     ifstream friendfile(FRIENDDATA);
     char buffer[100];
     //读用户关系数据
@@ -282,8 +281,11 @@ void readTrainFriendData(){
         addFriend(fuid,suid);
     }
 }
+//找到数量为count的负例
 int addNegativeCase(int fromid,FeatureMap * metaFea,ofstream &outFile,int count){
-    int necount=0;
+    int negcount=0;//选择的负例数量
+    int trueNegCount=0;//原始的负例数量
+    bool flag=true;//是否还要继续添加负例
     //ofstream outFile=outFilePtr;
     for(int i=0;i<5;i++){
         float feat[5];
@@ -308,26 +310,28 @@ int addNegativeCase(int fromid,FeatureMap * metaFea,ofstream &outFile,int count)
                     }
                 }
             }
-            if((rand()%100)==1){
+            trueNegCount++;
+            if(flag&&(rand()%100)==1){
                 outFile<<fromid<<","<<toid<<",";
                 for(int x=0;x<5;x++){
                     outFile<<feat[x]<<",";
                 }
                 outFile<<"0"<<endl;
-                necount++;
-                if(necount==count){
-                    return necount;
+                negcount++;
+                if(negcount==count){
+                    flag=false;
                 }
 
             }
         }
     }
-    return necount;
+    return trueNegCount;
 }
 
 void readTestData(){
     ifstream testfile(CHECKTESTDATA);
     ofstream outfile(TRAINDATA,ios::out);
+    int userCount;
     char buffer[100];
     int lastuserid=-1;
     FeatureMap metaFeature[5];
@@ -346,11 +350,12 @@ void readTestData(){
 
     int positiveCount=0;//正例数量
     int negativeCount=0;//放入数据集负例数量
-    int trueNeCount=0;//真实的全部负例数量
+    int trueNegCount=0;//真实的全部负例数量
 
     int i=0;
     cout<<"读取test文件"<<endl;
-    int lastPoCount=0;//上一个userid的正例
+    int lastPosCount=0;//上一个userid的正例
+
     while(true){
         i++;
         //if(i==1000) break;//just for test
@@ -366,22 +371,27 @@ void readTestData(){
         int locid=atoi(result[4].data());
         User * u=::getUserPtrbyId(userid,NOALLOWNEW);
         Location * l=::getLocationPtrbyId(locid,NOALLOWNEW);
+
         if(u==NULL||l==NULL){//如果用户或者位置不存在
             nullCount++;
             continue;
         }
         if(userid!=lastuserid){
+            userCount++;
             //把上一个User中的剩余签到作为负例
             if(lastuserid!=-1){
-                negativeCount+=::addNegativeCase(lastuserid,metaFeature,outfile,lastPoCount);
+                negativeCount+=lastPosCount;
+                trueNegCount+=::addNegativeCase(lastuserid,metaFeature,outfile,lastPosCount);
             }
+            //出现一个新的userid，找到这个用户通过元路径到达的所有位置，并计算出用户-位置的元路径特征值
             metaFeature[0]=::calFeature(userid,route0,2);
             metaFeature[1]=::calFeature(userid,route1,2);
             metaFeature[2]=::calFeature(userid,route2,3);
             metaFeature[3]=::calFeature(userid,route3,3);
             metaFeature[4]=::calFeature(userid,route4,3);
+
             lastuserid=userid;
-            lastPoCount=0;
+            lastPosCount=0;
         }
         EdgeMap *emp=u->getToLocE();
         if(emp->find(locid)!=emp->end()){//如果用户已经访问过该位置
@@ -391,37 +401,41 @@ void readTestData(){
         int flag=0;
         FeatureMap::iterator miter;
         float tmpFeature[5];
-        for(int i=0;i<5;i++){
+        for(int i=0;i<5;i++){//从五个特征map里面分别找lid
             miter=metaFeature[i].find(locid);
-            if(miter!=metaFeature[i].end()){
+            if(miter!=metaFeature[i].end()){//找到一个，说明通过此元路径可以到达该位置，则次元路径可以作为用户-位置对的一个特征
                 tmpFeature[i]=miter->second;
                 metaPathInCount[i]++;
                 flag=1;
-                metaFeature[i].erase(miter);
-            }else{
+                metaFeature[i].erase(miter);//并将此位置从特征MAP里面删掉，以防止负例选择时选择到他。
+            }else{//此元路径无法从用户到达该位置
                  tmpFeature[i]=0;
             }
         }
-        if(flag==0) noCount++;
+        if(flag==0) noCount++;//不属于任何元路径可以访问得到的位置
         else{//添加一个正例
             outfile<<userid<<","<<locid;
             for(int i=0;i<5;i++)
                 outfile<<","<<tmpFeature[i];
             outfile<<",1"<<endl;
             positiveCount++;
-            lastPoCount++;
+            lastPosCount++;
         }
     }
     //将最后的一个Userid的负例插入
-    negativeCount+=::addNegativeCase(lastuserid,metaFeature,outfile,trueNeCount);
+    negativeCount+=lastPosCount;
+    trueNegCount+=::addNegativeCase(lastuserid,metaFeature,outfile,lastPosCount);
+
+    //输出各种参数
+    cout<<"测试数据集中出现的所有的用户数量："<<userCount<<endl;
     cout<<"所有的签到记录数量AllCount:"<<allCount<<endl;
     for(int i=0;i<5;i++)
         cout<<"属于元路径到达的签到数量metaPathInCount["<<i<<"]:"<<metaPathInCount[i]<<endl;
     cout<<"重复的签到数量ReCount:"<<reCount<<endl;
     cout<<"不属于元路径可到到的位置的签到数量noCount:"<<noCount<<endl;
     cout<<"正例数量："<<positiveCount<<endl;
-    cout<<"输出负例数量："<<negativeCount<<endl;
-    cout<<"负例数量trueNeCount："<<trueNeCount<<endl;
+    cout<<"选择的输出负例数量："<<negativeCount<<endl;
+    cout<<"负例数量trueNeCount："<<trueNegCount<<endl;
     cout<<"用户或者位置节点不属于原始数据集的签到数量"<<nullCount<<endl;
 }
 void main()
@@ -434,6 +448,8 @@ void main()
     readTrainCheckinData();
     readTrainFriendData();
     ::readTestData();
+    cout<<"数据集中的所有用户数量："<<::userlist.size()<<endl;
+    cout<<"数据集中所有的位置数量："<<::locationlist.size()<<endl;
     int xx;
     cin>>xx;
 }

@@ -11,8 +11,10 @@ except AttributeError:
 f=open("d:\\data\\filter2.txt",'r')
 trainf1=open("d:\\data\\traindata1.txt",'w+')
 trainf2=open("d:\\data\\traindata2.txt",'w+')
-testf=open("d:\\data\\testdata2.txt",'w+')
-testc=0
+testf1=open("d:\\data\\testdata1.txt",'w+')
+testf2=open("d:\\data\\testdata2.txt",'w+')
+testc1=0
+testc2=0
 trainc1=0
 trainc2=0
 #逐行处理数据
@@ -29,9 +31,11 @@ while True:
 
     #基于每个签到的时间分布
     if tm.tm_year==2010 and tm.tm_mon>=10:
-        testf.write(newline)
-        testc=testc+1
+        testf2.write(newline)
+        testc2=testc2+1
     else:
+        testf1.write(newline)
+        testc1=testc1+1
         if tm.tm_year==2010 and tm.tm_mon>=9:
             trainf2.write(newline)
             trainc2=trainc2+1
@@ -39,4 +43,4 @@ while True:
             trainf1.write(newline)
             trainc1=trainc1+1
 
-print "Train1Count:",trainc1,"     Train2Count:",trainc2,"   TestCount:",testc
+print "Train1Count:",trainc1,"     Train2Count:",trainc2,"   Test1Count:",testc1,"   Test2Count:",testc2

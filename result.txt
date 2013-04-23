@@ -20,23 +20,24 @@ newdensity 3.81369052626e-07
 
 
 
+Correctly Classified Instances      183606               83.9549 %
+Incorrectly Classified Instances     35090               16.0451 %
+Kappa statistic                          0.5875
+Mean absolute error                      0.2542
+Root mean squared error                  0.3463
+Relative absolute error                 58.0903 %
+Root relative squared error             74.0401 %
+Total Number of Instances           218696     
 
+=== Detailed Accuracy By Class ===
 
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.539     0.017      0.939     0.539     0.685      0.92     1
+                 0.983     0.461      0.817     0.983     0.892      0.92     0
+Weighted Avg.    0.84      0.317      0.856     0.84      0.825      0.92 
 
+=== Confusion Matrix ===
 
-
-
-
-
-
-
-------------本行文字及以下内容不需要提交。打印后请将本页纸对折，把前半页交给财务处完成转账------------
-
-
-
-相关说明：
-1)	校内作者一律通过校内转账凭证将100元审稿费转到学报校内账号上。粗体字对应的空白处为都需要填写、签字或盖章。
-2)	可以就近到四牌楼校区或九龙湖校区财务处会计科完成转账。
-3)	如果人多，可在财务处会计科办理预约转账，把要转账凭证交给财务处会计科，会计科办理完毕就会在预约单上注明已办完；在人少时，可直接在会计科柜台完成转账。
-4)	办好后请将财务处完成转账的凭单或其他有效信息以及稿件编号发至xuebao@seu.edu.cn，以便编辑部在投稿系统中登录缴费信息，并由系统发出确认信到作者邮箱。
-5)	如有不清楚的地方，可发邮件到xuebao@seu.edu.cn或打电话83794323咨询。
+      a      b   <-- classified as
+  38111  32612 |      a = 1
+   2478 145495 |      b = 0

@@ -1,0 +1,14 @@
+# -*- coding: cp936 -*-
+f=open("d:\\data\\filter_testfeaturedata.txt",'r')
+ft=open("d:\\data\\half_testfeaturedata.txt",'w+')
+i=0
+while True:
+    newline=f.readline()
+    if ""==newline:
+        break;
+    arr=newline.split(',');
+    if userId!=lastUserId:
+        i=i+1
+        if i>10:
+            break
+    

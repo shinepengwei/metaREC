@@ -10,7 +10,7 @@
 #define CHECKTESTDATA "d:\\data\\testdata2.txt"
 #define TRAINDATA "d:\\data\\trainfeaturedata.txt"
 
-    /*
+   /* 
 #define CHECKINDATA "d:\\data\\test\\testdata.txt"
 #define FRIENDDATA "d:\\data\\test\\testfriend.txt"
 #define CHECKTESTDATA "d:\\data\\test\\testtestdata.txt"
