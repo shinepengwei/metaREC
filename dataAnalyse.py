@@ -12,11 +12,9 @@ loc_checkin_table=xlsfile.add_sheet('loc_checkin_count')
 user_checkin_table=xlsfile.add_sheet('user_checkin_count')
 locr_table=xlsfile.add_sheet('locr_count')
 
-f=open("d:\\filter2.txt",'r')
-trainf=open("d:\\trainfilter2.txt",'w+')
-testf=open("d:\\testfilter2.txt",'w+')
-
-
+f=open("d:\\data\\processedChekins.txt",'r')
+#trainf=open("d:\\trainfilter2.txt",'w+')
+#testf=open("d:\\testfilter2.txt",'w+')
 
 locr={0:{0:0}}
 user_loc={0:{0:0}}
@@ -39,7 +37,6 @@ lastlocid=arr[4]
 
 i=0
 while True:
-    #i=i+1
     newline=f.readline()
     if newline=='':
         break;
@@ -50,16 +47,17 @@ while True:
     locidstr=arr[4]
     locid=int(locidstr[:-2])
 
-    #统计每个签到的时间分布
+    '''#统计每个签到的时间分布
     if tm.tm_year==2010 and tm.tm_mon>=10:
         testf.write(newline)
         testc=testc+1
     else:
         trainf.write(newline)
         trainc=trainc+1
+    '''
 
-print "TrainCount:",trainc,"   TestCount:",trainc
-'''
+
+
     #统计每个用户的签到次数
     
     if userckins.has_key(userid):
@@ -103,8 +101,8 @@ print "TrainCount:",trainc,"   TestCount:",trainc
 
 #统计及输出
 
-print 'trainset:',trainc
-print 'testSet:',testc
+#print 'trainset:',trainc
+#print 'testSet:',testc
 
 
 
@@ -128,7 +126,7 @@ for flid in locr.keys():
 for i in range(0,1000):
     locr_table.write(i,0,i)
     locr_table.write(i,1,locrcountlist[i])
-xlsfile.save('d:\\data1.xls')
+
 
 #统计在某一区间的签到数量的位置数量，R为range，N为取样点数量
 print '统计在某一区间的签到数量的位置数量'
@@ -159,8 +157,7 @@ for i in range(0,N):
     tmpstr=i
     user_checkin_table.write(i,0,tmpstr)
     user_checkin_table.write(i,1,userckincountlist[i])
-'''
 
-
+xlsfile.save('d:\\data1.xls')
 print 'end!'
 

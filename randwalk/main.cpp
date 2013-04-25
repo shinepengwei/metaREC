@@ -7,13 +7,18 @@
 #include<string>
 #include <vector>
 #include <map>
+#include <set>
 #include<time.h>
 #include<math.h>
 
 #define TIME_ITERVAL 24*60*60
+#define OUTPUT_NEG_EQUAL 1//1显示和正例相同的负例-train集，0显示所有的负例-test集
+#define MOD_FILE_WRITE 1//1表示结果写文件，0表示结果忽略，只为了统计数据。
 static  UserMap userlist;
 static LocMap locationlist;
-
+using std::cout;
+int outputNegMod;
+int outputFileWriteMod;
 
 User* getUserPtrbyId(int id,int allownewtype){
     UserMap::iterator iter;
@@ -275,14 +280,20 @@ void readTrainFriendData(){
         friendfile.getline(buffer,100);
         string str(buffer);
         vector<std::string> result=split(str);
-
+        if(result.size()!=2){
+            break;
+        }
         int fuid=atoi(result[0].data());
         int suid=atoi(result[1].data());
         addFriend(fuid,suid);
     }
 }
-//找到数量为count的负例
+//找到数量为count的负例,若count=-1，则将所有的负例都返回
 int addNegativeCase(int fromid,FeatureMap * metaFea,ofstream &outFile,int count){
+    if(count==0) return 0;
+    if(outputNegMod!=OUTPUT_NEG_EQUAL){
+        count=-1;
+    }
     int negcount=0;//选择的负例数量
     int trueNegCount=0;//原始的负例数量
     bool flag=true;//是否还要继续添加负例
@@ -311,12 +322,14 @@ int addNegativeCase(int fromid,FeatureMap * metaFea,ofstream &outFile,int count)
                 }
             }
             trueNegCount++;
-            if(flag&&(rand()%100)==1){
-                outFile<<fromid<<","<<toid<<",";
-                for(int x=0;x<5;x++){
-                    outFile<<feat[x]<<",";
+            if(count==-1||(flag&&(rand()%100)==1)){
+                if(outputFileWriteMod==MOD_FILE_WRITE){
+                    outFile<<fromid<<","<<toid<<",";
+                    for(int x=0;x<5;x++){
+                        outFile<<feat[x]<<",";
+                    }
+                    outFile<<"0"<<endl;
                 }
-                outFile<<"0"<<endl;
                 negcount++;
                 if(negcount==count){
                     flag=false;
@@ -344,7 +357,8 @@ void readTestData(){
     int allCount=0;//所有的签到记录数量
     int metaPathInCount[5];//属于元路径到达的签到数量
     for(int i=0;i<5;i++) metaPathInCount[i]=0;
-    int reCount=0;//重复的签到数量
+    int reCount=0;//和train阶段重复的签到数量
+    int testReCount=0;//在test阶段已经生成了正例的签到数量
     int noCount=0;//不属于元路径可到到的位置的签到数量
     int nullCount=0;//用户或者位置节点不属于原始数据集的签到数量
 
@@ -353,9 +367,11 @@ void readTestData(){
     int trueNegCount=0;//真实的全部负例数量
 
     int i=0;
-    cout<<"读取test文件"<<endl;
+    std::cout<<"读取test文件"<<endl;
     int lastPosCount=0;//上一个userid的正例
 
+    //用户到达过的位置集合:
+    set<int> uLocSet;
     while(true){
         i++;
         //if(i==1000) break;//just for test
@@ -367,6 +383,9 @@ void readTestData(){
         testfile.getline(buffer,100);
         string str(buffer);
         vector<std::string> result=split(str);
+        if(result.size()!=5){
+            break;
+        }
         int userid=atoi(result[0].data());
         int locid=atoi(result[4].data());
         User * u=::getUserPtrbyId(userid,NOALLOWNEW);
@@ -378,10 +397,13 @@ void readTestData(){
         }
         if(userid!=lastuserid){
             userCount++;
+            uLocSet.clear();//清空用户访问的位置集合
             //把上一个User中的剩余签到作为负例
             if(lastuserid!=-1){
-                negativeCount+=lastPosCount;
-                trueNegCount+=::addNegativeCase(lastuserid,metaFeature,outfile,lastPosCount);
+                negativeCount+=lastPosCount;//添加和正例数量相同的负例
+                if(lastPosCount>=20){//如果正例数量大于20，才进行分析
+                    trueNegCount+=::addNegativeCase(lastuserid,metaFeature,outfile,lastPosCount);
+                }
             }
             //出现一个新的userid，找到这个用户通过元路径到达的所有位置，并计算出用户-位置的元路径特征值
             metaFeature[0]=::calFeature(userid,route0,2);
@@ -394,8 +416,14 @@ void readTestData(){
             lastPosCount=0;
         }
         EdgeMap *emp=u->getToLocE();
-        if(emp->find(locid)!=emp->end()){//如果用户已经访问过该位置
+        if(emp->find(locid)!=emp->end()){//如果用户train阶段已经访问过该位置
             reCount++;
+            continue;
+        }
+        set<int>::const_iterator resIter=uLocSet.find(locid);
+        if(resIter!=uLocSet.end()){//用户在test阶段已经访问过
+        //当出现用户在test阶段两次访问某一位置时，不生成正例。
+            testReCount++;
             continue;
         }
         int flag=0;
@@ -414,29 +442,35 @@ void readTestData(){
         }
         if(flag==0) noCount++;//不属于任何元路径可以访问得到的位置
         else{//添加一个正例
-            outfile<<userid<<","<<locid;
-            for(int i=0;i<5;i++)
-                outfile<<","<<tmpFeature[i];
-            outfile<<",1"<<endl;
+            if(outputFileWriteMod==MOD_FILE_WRITE){
+                outfile<<userid<<","<<locid;
+                for(int i=0;i<5;i++)
+                    outfile<<","<<tmpFeature[i];
+                outfile<<",1"<<endl;
+            }
             positiveCount++;
             lastPosCount++;
         }
     }
     //将最后的一个Userid的负例插入
     negativeCount+=lastPosCount;
-    trueNegCount+=::addNegativeCase(lastuserid,metaFeature,outfile,lastPosCount);
+    if(lastPosCount>=20)
+        trueNegCount+=::addNegativeCase(lastuserid,metaFeature,outfile,lastPosCount);
 
     //输出各种参数
-    cout<<"测试数据集中出现的所有的用户数量："<<userCount<<endl;
+    cout<<"测试数据集中出现的所有的用户数量userCount："<<userCount<<endl;
     cout<<"所有的签到记录数量AllCount:"<<allCount<<endl;
     for(int i=0;i<5;i++)
         cout<<"属于元路径到达的签到数量metaPathInCount["<<i<<"]:"<<metaPathInCount[i]<<endl;
+
     cout<<"重复的签到数量ReCount:"<<reCount<<endl;
+    cout<<"在test阶段重复的签到数量TestReCount:"<<testReCount<<endl;
     cout<<"不属于元路径可到到的位置的签到数量noCount:"<<noCount<<endl;
-    cout<<"正例数量："<<positiveCount<<endl;
-    cout<<"选择的输出负例数量："<<negativeCount<<endl;
+    cout<<"用户或者位置节点不属于原始数据集的签到数量nullCount"<<nullCount<<endl;
+    cout<<"正例数量positiveCount："<<positiveCount<<endl;
+    cout<<"选择的输出负例数量negativeCount："<<negativeCount<<endl;
     cout<<"负例数量trueNeCount："<<trueNegCount<<endl;
-    cout<<"用户或者位置节点不属于原始数据集的签到数量"<<nullCount<<endl;
+    outfile.close();
 }
 void main()
 {
@@ -444,6 +478,10 @@ void main()
     ifstream checkinfile("d:\\testdata.txt");
     ifstream friendfile("d:\\testfriend.txt");
     ifstream testfile("d:\\testtestdata.txt");*/
+    cout<<"outputNegMod: 1显示和正例相同的负例-train集，0显示所有的负例-test集"<<endl;
+    cin>>outputNegMod;
+    cout<<"outputFileWriteMod:1表示结果写文件，0表示结果忽略，只为了统计数据。"<<endl;
+    cin>>outputFileWriteMod;
 
     readTrainCheckinData();
     readTrainFriendData();
