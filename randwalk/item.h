@@ -5,9 +5,9 @@ class Item
 {
 protected:
     int id;
-    EdgeMap tolocv;
-    EdgeMap touserv;
-    int tolocAllWei;
+    EdgeMap tolocv;//locationId,*Edge
+    EdgeMap touserv;//userId,*Edge
+    int tolocAllWei;//指向位置节点的所有的边的权重和
     int touserAllWei;
 public:
     Item(int itemid);

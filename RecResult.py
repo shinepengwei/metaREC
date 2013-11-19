@@ -1,8 +1,12 @@
 # -*- coding: cp936 -*-
+#useful！！！！！
+#对测试集中的用户进行推荐，选择TOP-N的推荐结果，判断是否去过，然后去计算精确率和召回率
+#
 f=open("d:\\data\\filter_testfeaturedata.txt",'r')
 def calculateResult(x1,x2,x3,x4,x5):
-    return x1*-27.7533+x2*3.2153+x3*5.5221+x4*216.9338+x4*474.9037-0.1486
-    
+    return x1*-27.7533+x2*3.2153+x3*5.5221+x4*216.9338+x5*474.9037-0.1486
+#边权值为访问次数：x1*-27.7533+x2*3.2153+x3*5.5221+x4*216.9338+x5*474.9037-0.1486 f=open("d:\\data\\filter_testfeaturedata.txt",'r')
+#边权值为lg（访问次数）：x1*97.9885+x2*85.4924+x3*2257.5582+x4*1316.0888+x5*24852.8477-0.0465 f=open("d:\\data\\second\\filter_log_testfeaturedata.txt",'r')
 class Result:
     def __init__(self,result,label):
         self.result=result
@@ -36,15 +40,15 @@ def calPostiveCountAtN(resultlist,N):
     i=0
     posCount=0
     if 20==N:
-        while i<20:
+        while i<len(resultlist):
             if resultlist[i].getLabel()==1:
                 posCount=posCount+1
             i=i+1
         return posCount
-    else:
+    else:#如果是找前5个或者前10个
         minIndex=-1
         rlist=[]
-        while i<len(resultlist):
+        while i<len(resultlist):#找到前N个
             if i<N:
                 rlist.append(resultlist[i])
                 minIndex=findMinIndex(rlist)
@@ -53,9 +57,9 @@ def calPostiveCountAtN(resultlist,N):
                     rlist[minIndex]=resultlist[i]
                     minIndex=findMinIndex(rlist)
             i=i+1
+         #print "top-",N,":"
         i=0
-        #print "top-",N,":"
-        while i<N:
+        while i<N and i<len(resultlist):
             #print rlist[i].getResult(),",",rlist[i].getLabel()
             if rlist[i].getLabel()==1:
                 posCount=posCount+1
@@ -81,9 +85,9 @@ while True:
     arr=newline.split(',');
     userId=int(arr[0])
     label=int(arr[7])
-    if userId!=lastUserId:#deal with new user, calculate the last User's result
+    if userId!=lastUserId:#deal with new user, calculate the last User's result 新用户
         #TODO calculate recommendation result based on resultlist
-        if lastUserId!=-1:
+        if lastUserId!=-1:#首先对上个用户结果进行整理
             #print "resultlist"
             #printlist(resultlist)
             #print "======"

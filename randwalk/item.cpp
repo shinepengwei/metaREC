@@ -121,7 +121,7 @@ void Item::print(string type){
     }
     cout<<"TO User Edge:"<<endl;
     for(iter=this->touserv.begin();iter!=touserv.end();++iter){
-        cout<<"    User Id:"<<iter->first<<" [";
+        cout<<"    User Id:"<<iter->first<<" ["; 
         if(iter->second!=NULL) iter->second->print();
         cout<<"]"<<endl;
     }
