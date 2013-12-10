@@ -1,6 +1,13 @@
 # -*- coding: cp936 -*-
-f=open("d:\\data\\second\\log_testfeaturedata.txt",'r')
-tf=open("d:\\data\\second\\filter_log_testfeaturedata.txt",'w')
+#log:
+#f=open("d:\\data\\second\\log_testfeaturedata.txt",'r')
+#tf=open("d:\\data\\second\\filter_log_testfeaturedata.txt",'w')
+#不考虑l-l边
+#f=open("d:\\data\\testfeaturedata_nolledge.txt",'r')
+#tf=open("d:\\data\\filter_testfeaturedata_nolledge.txt",'w')
+#正常
+f=open("d:\\data\\testfeaturedata.txt",'r')
+tf=open("d:\\data\\filter_testfeaturedata.txt",'w')
 lastUseId=-1
 lastLabel=0
 postiveCount=0
@@ -25,7 +32,7 @@ while True:
         break;
     arr=newline.split(',');
     userId=arr[0]
-    label=int(arr[7])
+    label=int(arr[5])#5或者7
     if userId!=lastUseId:
         allUserCount=allUserCount+1
         postiveCount=0
