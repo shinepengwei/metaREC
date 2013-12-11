@@ -1,5 +1,8 @@
+#pragma once
 #include<string>
 #include <vector>
+#include "base.h"
+#include <iostream>
 using namespace std;
 vector<std::string> split(string str)
 {
@@ -23,4 +26,16 @@ vector<std::string> split(string str)
         }
     }
     return result;
+}
+int itemType(const char t){
+    if (t=='L')
+    {
+        return ITEMTYPE_LOCATION;
+    }else if (t=='U')
+    {
+        return ITEMTYPE_USER;
+    }else{
+        cout<<"³ÌÐò´íÎó£ºtool.cpp-itemType():"<<t<<endl;
+        exit(0);
+    }
 }

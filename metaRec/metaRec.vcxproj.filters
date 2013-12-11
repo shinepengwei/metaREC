@@ -27,6 +27,9 @@
     <ClInclude Include="Socialnet.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MetaCpu.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="item.cpp">
@@ -42,6 +45,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MetaCpu.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

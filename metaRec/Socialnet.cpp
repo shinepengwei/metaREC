@@ -8,10 +8,9 @@ extern int isDebug;
 vector<std::string> split(string str);
 int Socialnet::instanceCount=0;
 
-Socialnet::Socialnet(int weightCpuType,bool hasLLRelation)
+Socialnet::Socialnet(int weightCpuType,bool hasLLRelation):hasLLRelation(hasLLRelation)
 {
     this->weightCpuType=weightCpuType;   
-    this->hasLLRelation=hasLLRelation;
 }
 Socialnet *Socialnet::createSocialnet(string chinkinFileName,string friendFileName,int weightCpuType,bool hasLLRelation) {
     if (instanceCount==1)
@@ -106,6 +105,7 @@ Socialnet::~Socialnet(void)
 {
     instanceCount=0;
 }
+
 Item * Socialnet::getItemPtrById(int id,int itemType,bool isAllowNewType){
     ItemMap * itemList;
     if(itemType==ITEMTYPE_USER){

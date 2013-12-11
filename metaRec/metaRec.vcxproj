@@ -63,12 +63,14 @@
     <ClInclude Include="base.h" />
     <ClInclude Include="Edge.h" />
     <ClInclude Include="item.h" />
+    <ClInclude Include="MetaCpu.h" />
     <ClInclude Include="Socialnet.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="item.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MetaCpu.cpp" />
     <ClCompile Include="Socialnet.cpp" />
     <ClCompile Include="tool.cpp" />
   </ItemGroup>

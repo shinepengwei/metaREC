@@ -23,6 +23,9 @@
 
 #define NOT_CONCERN_LL_RELATION false
 
+#define OUTPUT_NEG_EQUAL 1
+#define OUTPUT_NEG_NOT_EQUAL 0
+
 
 
 using namespace std;
@@ -30,8 +33,10 @@ class Edge;
 class Item;
 typedef map<int ,Edge * > EdgeMap;
 typedef map<int,Item*> ItemMap;
-
 typedef map<int,float> FeatureMap;
 
+
+vector<std::string> split(string str);
+int itemType(char t);
 
 

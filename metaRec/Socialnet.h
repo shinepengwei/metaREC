@@ -12,6 +12,7 @@ public:
         int weightCpuType=WEIGHTCPUTYPE_NORMAL,
         bool hasLLRelation=true
         ) ;
+    bool const hasLLRelation;
 private:
     Socialnet(int,bool);
     void readCheckinData(string chinkinFileName);
@@ -19,13 +20,13 @@ private:
     void addCheckin(int userId,int locId);
     void addFriend(int userId,int user2Id);
     void addLLRelation(int locId,int locId2);
-
+    
 private:
     ItemMap userList;
     ItemMap locList;
 
     int weightCpuType;//边的权值计算方法
-    bool hasLLRelation;
+    
 
     static int instanceCount;//单例模式
     static const int time_iterval=24*60*60;

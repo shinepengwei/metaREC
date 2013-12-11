@@ -5,12 +5,13 @@ class Item
 public:
     Item(int itemid);
     Item(int itemid,int itemType);
-    void print(int type);
+    void print(int type,int kongbaiCount=0);
 
     //获得边集合的不同接口
-    EdgeMap* getToLocE();
-    EdgeMap* getToUserE();
-    EdgeMap * getToItemE(int type);
+    EdgeMap* getToLocE() ;
+    EdgeMap* getToUserE() ;
+    EdgeMap * getToItemE(int type) ;
+
 
 
 
@@ -19,8 +20,9 @@ public:
 
 
     //获取某一类边的权值之和
-    float getAllWeight(char type);
+    float getAllWeight(int type);
     int getId();
+    int getType();
 
 
 private:

@@ -19,10 +19,10 @@ Item::Item(int itemid,int itemType){
 int Item::getId(){
     return id;
 }
-EdgeMap* Item::getToLocE(){
+ EdgeMap* Item::getToLocE(){
     return &(this->toLocE);
 }
-EdgeMap* Item::getToUserE(){
+EdgeMap* Item::getToUserE() {
     return &(this->toUserE);
 }
 EdgeMap * Item::getToItemE(int type){
@@ -36,8 +36,8 @@ EdgeMap * Item::getToItemE(int type){
 }
 
 
-float Item::getAllWeight(char type){
-    if(type=='L'){
+float Item::getAllWeight(int type){
+    if(type==ITEMTYPE_LOCATION){
         if(this->toLocAllWei==-1){
             float allwei=0;
             for(EdgeMap::const_iterator iter=this->toLocE.begin();iter!=toLocE.end();++iter){
@@ -47,7 +47,7 @@ float Item::getAllWeight(char type){
             return toLocAllWei;
         }
         return this->toLocAllWei;
-    }else if(type=='U'){
+    }else if(type==ITEMTYPE_USER){
         if(toUserAllWei==-1){
             float allwei=0;
             for(EdgeMap::const_iterator iter=this->toUserE.begin();iter!=toUserE.end();++iter){
@@ -87,8 +87,15 @@ void Item::addToUserE(int id,int weightCPUType,int time){
 }
 
 
-void Item::print(int itemtype){
-    string kongbai="    ";
+void Item::print(int itemtype,int kongbaiCount){
+    string kongbai="     ";
+    string kongbaijianyi="";
+    while (kongbaiCount>0)
+    {
+        kongbai=kongbai+"     ";
+        kongbaijianyi=kongbaijianyi+"     ";
+        kongbaiCount--;
+    }
     string type;
     if (itemtype==ITEMTYPE_USER)
     {
@@ -96,8 +103,8 @@ void Item::print(int itemtype){
     }else{
         type="LOCATION";
     }
-    std::cout<<"_____"<<type<<" Begin_______"<<endl;
-    cout<<type<<"ID£º"<<this->id<<endl;
+    std::cout<<kongbaijianyi<<"_____"<<type<<" Begin_______"<<endl;
+    cout<<kongbaijianyi<<type<<"ID£º"<<this->id<<endl;
     EdgeMap::iterator iter=this->toLocE.begin();
     cout<<kongbai<<"TO Location Edge:"<<endl;
     for(;iter!=toLocE.end();++iter){
@@ -111,5 +118,8 @@ void Item::print(int itemtype){
         if(iter->second!=NULL) iter->second->print();
         cout<<"]"<<endl;
     }
-    cout<<"_____"<<type<<" End_______"<<endl;
+    cout<<kongbaijianyi<<"_____"<<type<<" End_______"<<endl;
+}
+int Item::getType(){
+    return type;
 }
