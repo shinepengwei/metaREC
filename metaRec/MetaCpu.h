@@ -41,8 +41,8 @@ private:
         Item * location,
         FeatureMap * metaFea,
         set<int> *uLocSet,
-        ofstream &outFile,
-        int * metaPathInCount//记录该正例属于那一个元路径
+        int * metaPathInCount,//记录该正例属于那一个元路径
+        string & postiveStr////存储将要写入文件的正例字符串，在生成测试集阶段，如果正例不足20条就不写入，也不生成负例。
         );
 
     void printFeatureMap(const FeatureMap *fm) const;

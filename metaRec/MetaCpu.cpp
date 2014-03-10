@@ -1,24 +1,25 @@
 #include "MetaCpu.h"
 #include<fstream>
 #include <iostream>
-
+#include<sstream>
 #include<iterator>
 #include "Edge.h"
 extern int isDebug;
 MetaCpu::MetaCpu(Socialnet *socialNet,bool outputNegEqualPos,bool outputFileWrite):outputFileWrite(outputFileWrite),outputNegEqualPos(outputNegEqualPos){
     this->socialNet=socialNet;
-    featureCount=5;
+    featureCount=6;
     if (!socialNet->hasLLRelation) featureCount=3;
 }
 
 //读取下一阶段的数据，计算元路径特征值，并且生成正负例并将其保存在文件中。
 void MetaCpu::metaCpu(string testDateFileName,string outputFileName){
-    FeatureMap metaFeature[5];
+    FeatureMap metaFeature[6];
     int route0[3]={ITEMTYPE_USER,ITEMTYPE_USER,ITEMTYPE_LOCATION};//UUL
     int route1[4]={ITEMTYPE_USER,ITEMTYPE_USER,ITEMTYPE_USER,ITEMTYPE_LOCATION};//UUUL
     int route2[4]={ITEMTYPE_USER,ITEMTYPE_LOCATION,ITEMTYPE_USER,ITEMTYPE_LOCATION};//"ULUL";
     int route3[3]={ITEMTYPE_USER,ITEMTYPE_LOCATION,ITEMTYPE_LOCATION};//"ULL";
     int route4[4]={ITEMTYPE_USER,ITEMTYPE_LOCATION,ITEMTYPE_LOCATION,ITEMTYPE_LOCATION};//"ULLL";
+    int route5[4]={ITEMTYPE_USER,ITEMTYPE_USER,ITEMTYPE_LOCATION,ITEMTYPE_LOCATION};//"UULL";
 
     ifstream testfile(testDateFileName);
     ofstream outfile(outputFileName,ios::out);
@@ -27,7 +28,7 @@ void MetaCpu::metaCpu(string testDateFileName,string outputFileName){
     //统计信息
     int userCount=0;
     int allCount=0;//所有的签到记录数量
-    int metaPathInCount[5];//属于元路径到达的签到数量
+    int metaPathInCount[6];//属于元路径到达的签到数量
     for(int i=0;i<featureCount;i++) metaPathInCount[i]=0;
     int reCount=0;//和train阶段重复的签到数量
     int testReCount=0;//在test阶段已经生成了正例的签到数量
@@ -39,11 +40,13 @@ void MetaCpu::metaCpu(string testDateFileName,string outputFileName){
     int trueNegCount=0;//真实的全部负例数量
 
 
-    cout<<"读取test文件"<<endl;
+    cout<<"读取比较文件生成正负例："<<testDateFileName<<endl;
+    cout<<"结果写入文件："<<outputFileName<<endl;
     char buffer[100];
     int lastuserid=-1;
     int lastPosCount=0;//上一个userid的正例
     set<int> uLocSet;//用户到达过的位置集合
+    string postiveStr="";//存储将要写入文件的正例字符串，在生成测试集阶段，如果正例不足20条就不写入，也不生成负例。
     while (true)
     {
         allCount++;
@@ -72,10 +75,11 @@ void MetaCpu::metaCpu(string testDateFileName,string outputFileName){
             nullCount++;
             continue;
         }
-
+        
 
         //如果发现用户id是一个新的用户，先对旧的用户进行处理（添加负例），然后在计算新的用户的元路径能到达的位置
         if(userid!=lastuserid){
+          
             userCount++;
             uLocSet.clear();//清空用户访问的位置集合
 
@@ -84,46 +88,63 @@ void MetaCpu::metaCpu(string testDateFileName,string outputFileName){
                 negativeCount+=lastPosCount;//添加和正例数量相同的负例
                 if(lastPosCount>=20||outputNegEqualPos){
                     //如果正例数量大于20，或者输出与正例相同的负例，才进行分析
+                    if(isDebug){
+                        cout<<"正例写入文件：*****"<<endl;
+                        cout<<postiveStr<<"*********************"<<endl;
+                    }
+                    outfile<<postiveStr;
                     trueNegCount+=addNegativeCase(lastuserid,metaFeature,outfile,lastPosCount);
-                }
+
+               }
             }
 
             //出现一个新的userid，找到这个用户通过元路径到达的所有位置，并计算出用户-位置的元路径特征值
-            if(socialNet->hasLLRelation){
-                metaFeature[0]=calFeature(userid,route0,2);
-                metaFeature[1]=calFeature(userid,route1,3);
-                metaFeature[2]=calFeature(userid,route2,3);
-                metaFeature[3]=calFeature(userid,route3,2);
-                metaFeature[4]=calFeature(userid,route4,3);
-            }else{
-                metaFeature[0]=calFeature(userid,route0,2);
-                metaFeature[1]=calFeature(userid,route1,3);
-                metaFeature[2]=calFeature(userid,route2,3);
-            }
-            printFeatureMap(metaFeature);
+            metaFeature[0]=calFeature(userid,route0,2);
+            metaFeature[1]=calFeature(userid,route1,3);
+            metaFeature[2]=calFeature(userid,route2,3);
+            metaFeature[3]=calFeature(userid,route3,2);
+            metaFeature[4]=calFeature(userid,route4,3);
+            metaFeature[5]=calFeature(userid,route5,3);
+            if (isDebug) printFeatureMap(metaFeature);
             lastuserid=userid;
             lastPosCount=0;
+             postiveStr="";
         }
 
 
         //根据当前记录（user,location），以及获得的该用户的特征值集合，尝试添加一个正例
-        int reFlag=addAPositiveCase(user,location,metaFeature,&uLocSet,outfile,metaPathInCount);
+        int reFlag=addAPositiveCase(user,location,metaFeature,&uLocSet,metaPathInCount,postiveStr);
         if (reFlag==-2)
         {
+            if (isDebug) cout<<"上一阶段（构建LBSN网络）已经访问过该位置"<<endl;
             reCount++;
         }else if (reFlag==-1)
         {
+            if (isDebug) cout<<"这一阶段（生成正负例）已经访问过该位置"<<endl;
             testReCount++;
         }else if (reFlag==-3)
         {
+            if (isDebug) cout<<"该位置不属于任何元路径"<<endl;
             noCount++;
+        }else if (reFlag==1)
+        {
+            lastPosCount++;
+            positiveCount++;
         }
     }
 
     //将最后的一个Userid的负例插入
     negativeCount+=lastPosCount;
-    if(lastPosCount>=20||outputNegEqualPos)
+    if(lastPosCount>=20||outputNegEqualPos){
+        //如果正例数量大于20，或者输出与正例相同的负例，才进行分析
+        if(isDebug){
+            cout<<"正例写入文件：*****"<<endl;
+            cout<<postiveStr<<"*********************"<<endl;
+        }
+        outfile<<postiveStr;
         trueNegCount+=addNegativeCase(lastuserid,metaFeature,outfile,lastPosCount);
+
+    }
 
     //输出各种参数
     cout<<"测试数据集中出现的所有的用户数量userCount："<<userCount<<endl;
@@ -148,8 +169,8 @@ int MetaCpu::addAPositiveCase(
     Item * location,
     FeatureMap * metaFea,
     set<int> *uLocSet,
-    ofstream &outFile,
-    int *metaPathInCount
+    int *metaPathInCount,
+    string & postiveStr////存储将要写入文件的正例字符串，在生成测试集阶段，如果正例不足20条就不写入，也不生成负例。
     ){
         EdgeMap *userEdgeList=user->getToLocE();
         if(userEdgeList->find(location->getId())!=userEdgeList->end()){//如果用户在构建社交网络阶段已经访问过该位置
@@ -161,8 +182,8 @@ int MetaCpu::addAPositiveCase(
         int flag=0;
         FeatureMap::iterator miter;
 
-        float tmpFeature[5];
-        for(int i=0;i<featureCount;i++){//从五个特征map里面分别找lid
+        float tmpFeature[6];
+        for(int i=0;i<featureCount;i++){//从六个特征map里面分别找lid
             miter=metaFea[i].find(location->getId());
             if(miter!=metaFea[i].end()){
                 //找到一个，说明通过此元路径可以到达该位置，则次元路径可以作为用户-位置对的一个特征
@@ -179,10 +200,23 @@ int MetaCpu::addAPositiveCase(
             int locid=location->getId();
             uLocSet->insert(locid);
             if(outputFileWrite){
-                outFile<<user->getId()<<","<<locid;
+                stringstream ss;
+                string tmp;
+                ss<<user->getId()<<","<<locid;
                 for(int i=0;i<featureCount;i++)
-                    outFile<<","<<tmpFeature[i];
-                outFile<<",1"<<endl;
+                    ss<<","<<tmpFeature[i];
+                ss<<",1";
+                ss>>tmp;
+                postiveStr.append(tmp);
+                postiveStr.append("\n");
+                if (isDebug)
+                {
+                    cout<<"生成正例："<<endl;
+                    cout<<user->getId()<<","<<locid;
+                    for(int i=0;i<featureCount;i++)
+                        cout<<","<<tmpFeature[i];
+                    cout<<",1"<<endl;
+                }
             }
            return 1;
         }
@@ -317,9 +351,9 @@ int MetaCpu::addNegativeCase(int fromid,
     int trueNegCount=0;//原始的负例数量
     bool flag=true;//是否还要继续添加负例
 
-    
+    if (isDebug) printFeatureMap(metaFea);
     for(int i=0;i<featureCount;i++){
-        float feat[5];
+        float feat[6];
         if(i>0){
             for(int j=0;j<i;j++){
                 feat[j]=0;
@@ -349,6 +383,14 @@ int MetaCpu::addNegativeCase(int fromid,
                         outFile<<feat[x]<<",";
                     }
                     outFile<<"0"<<endl;
+                    if (isDebug)
+                    {
+                        cout<<fromid<<","<<toid<<",";
+                        for(int x=0;x<featureCount;x++){
+                            cout<<feat[x]<<",";
+                        }
+                        cout<<"0"<<endl;
+                    }
                 }
                 negcount++;
                 if(negcount==count){
@@ -362,10 +404,7 @@ int MetaCpu::addNegativeCase(int fromid,
 }
 
 void MetaCpu::printFeatureMap(const FeatureMap *fm) const{
-    if (!isDebug)
-    {
-        return;
-    }
+
     string kongbai="    ";
     cout<<"****输出特征值集合Feature:"<<endl;
     for(int i=0;i<featureCount;i++){

@@ -8,14 +8,31 @@ Item::Item(int itemid)
     this->id=itemid;
     this->toLocAllWei=-1;//表示未初始化，在第一次获取即调用getAllWei()时计算
     this->toUserAllWei=-1;
+    this->latitude = -1;
+    this->longitude = -1;
 }
 Item::Item(int itemid,int itemType){
     this->id=itemid;
     this->toLocAllWei=-1;//表示未初始化，在第一次获取即调用getAllWei()时计算
     this->toUserAllWei=-1;
     this->type=itemType;
+    this->latitude = -1;
+    this->longitude = -1;
 }
-
+void Item::insertLongLati(float longitude, float latitude){
+    if (this->type != ITEMTYPE_LOCATION)
+    {
+        return;
+    }
+    this->longitude = longitude;
+    this->latitude = latitude;
+}
+float Item::getLongitude(){
+    return this->longitude;
+}
+float Item::getLatitude(){
+    return latitude;
+}
 int Item::getId(){
     return id;
 }
@@ -43,7 +60,11 @@ float Item::getAllWeight(int type){
             for(EdgeMap::const_iterator iter=this->toLocE.begin();iter!=toLocE.end();++iter){
                 allwei+=iter->second->getWeight();
             }
-            toLocAllWei=allwei;
+            if (allwei!=0)
+            {
+                toLocAllWei=allwei;
+            }else
+                toLocAllWei=1;
             return toLocAllWei;
         }
         return this->toLocAllWei;
@@ -53,7 +74,11 @@ float Item::getAllWeight(int type){
             for(EdgeMap::const_iterator iter=this->toUserE.begin();iter!=toUserE.end();++iter){
                 allwei+=iter->second->getWeight();
             }
-            toUserAllWei=allwei;
+            if (allwei!=0)
+            {
+                toUserAllWei=allwei;
+            }else
+                toUserAllWei=1;
             return toUserAllWei;
         }
         return this->toUserAllWei;

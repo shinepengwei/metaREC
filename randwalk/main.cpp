@@ -746,7 +746,6 @@ void FriendBasedRecommend(){
     ifstream testfile(checkinDataFileName);
 
 
-
     char buffer[100];
     int i=0;
     int lastUserId=-1;

@@ -2,8 +2,8 @@
 #f=open("d:\\data\\testdata2.txt",'r')
 #tf=open("d:\\data\\filter_testdata2.txt",'w')
 
-f=open("d:\\data\\traindata2.txt",'r')
-tf=open("d:\\data\\filter_testdata2.txt",'w')
+f=open("d:\\data\\output\\testdata2_foursquare.txt",'r')
+tf=open("d:\\data\\output\\filter_testdata2_foursquare.txt",'w')
 
 lastUseId=-1
 

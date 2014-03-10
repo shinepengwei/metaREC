@@ -6,13 +6,16 @@ public:
     Item(int itemid);
     Item(int itemid,int itemType);
     void print(int type,int kongbaiCount=0);
+    void insertLongLati(float longitude, float latitude);
 
     //获得边集合的不同接口
     EdgeMap* getToLocE() ;
     EdgeMap* getToUserE() ;
     EdgeMap * getToItemE(int type) ;
 
-
+    //获得经纬度
+    float getLongitude();
+    float getLatitude();
 
 
     void addToLocE(int id,int weightCPUType,int time=0);
@@ -25,6 +28,8 @@ public:
     int getType();
 
 
+
+
 private:
     void addEdge(int id,int weightCPUType,int time,int type);
 protected:
@@ -33,6 +38,8 @@ protected:
     int type;//ITEMTYPE_USER or ITEMTYPE_LOCATION
     EdgeMap toLocE;//locationId,*Edge
     EdgeMap toUserE;//userId,*Edge
+    float longitude;//经度
+    float latitude;//维度
     int toLocAllWei;//指向位置节点的所有的边的权重和,默认值为-1.-1时重新计算，如果不是-1说明已经计算完毕
 };
 

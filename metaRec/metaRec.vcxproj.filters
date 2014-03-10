@@ -30,6 +30,15 @@
     <ClInclude Include="MetaCpu.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="UCFRecommend.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BasedRecommend.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FriBasedRecommend.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="item.cpp">
@@ -48,6 +57,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="MetaCpu.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UCFRecommend.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BasedRecommend.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FriBasedRecommend.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

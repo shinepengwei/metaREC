@@ -61,18 +61,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="base.h" />
+    <ClInclude Include="BasedRecommend.h" />
     <ClInclude Include="Edge.h" />
+    <ClInclude Include="FriBasedRecommend.h" />
     <ClInclude Include="item.h" />
     <ClInclude Include="MetaCpu.h" />
     <ClInclude Include="Socialnet.h" />
+    <ClInclude Include="UCFRecommend.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BasedRecommend.cpp" />
     <ClCompile Include="Edge.cpp" />
+    <ClCompile Include="FriBasedRecommend.cpp" />
     <ClCompile Include="item.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MetaCpu.cpp" />
     <ClCompile Include="Socialnet.cpp" />
     <ClCompile Include="tool.cpp" />
+    <ClCompile Include="UCFRecommend.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

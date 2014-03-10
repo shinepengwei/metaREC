@@ -12,12 +12,13 @@ Socialnet::Socialnet(int weightCpuType,bool hasLLRelation):hasLLRelation(hasLLRe
 {
     this->weightCpuType=weightCpuType;   
 }
-Socialnet *Socialnet::createSocialnet(string chinkinFileName,string friendFileName,int weightCpuType,bool hasLLRelation) {
+Socialnet *Socialnet::createSocialnet(string chinkinFileName,string friendFileName,int weightCpuType,bool hasLLRelation,int time_iterval) {
     if (instanceCount==1)
     {
         return NULL;//已经创建了一个实力对象
     }
     Socialnet * socNet=new Socialnet(weightCpuType,hasLLRelation);
+    socNet->time_iterval=time_iterval*60*60;
     socNet->readCheckinData(chinkinFileName);
     socNet->readFriendData(friendFileName);
     instanceCount=1;
@@ -30,7 +31,7 @@ void Socialnet::readCheckinData(string chinkinFileName){
     int i=0;
     int lastUserId=0,lastLocId=0,lastTimeSec=0;//用于判断比较获得位置-位置边
     //根据用户的签到信息，读用户、位置节点信息以及用户-位置和位置-位置的边信息
-    cout<<"读取签到文件"<<endl;
+    cout<<"读取签到文件:"<<chinkinFileName<<endl;
     while(true){
         i++;
         if(i%100000==0) cout<<i<<",";
@@ -55,15 +56,16 @@ void Socialnet::readCheckinData(string chinkinFileName){
         int userid=atoi(result[0].data());
         int locid=atoi(result[4].data());
 
-        //插入签到数据
-        addCheckin(userid,locid);
 
-        if (hasLLRelation)
-        {
-            //插入位置-位置边数据
-            if(lastUserId==userid&&(lastTimeSec-tsec)<this->time_iterval&&lastLocId!=locid&&lastLocId!=0){
-                addLLRelation(lastLocId,locid);
-            }
+        float longitude = atof(result[3].data());
+        float latitude = atof(result[2].data());
+        //插入签到数据
+        addCheckin(userid,locid,longitude,latitude);
+
+
+        //插入位置-位置边数据
+        if(lastUserId==userid&&(tsec-lastTimeSec)<this->time_iterval&&lastLocId!=locid&&lastLocId!=0){
+            addLLRelation(lastLocId,locid);
         }
         lastUserId=userid;
         lastTimeSec=tsec;
@@ -79,7 +81,7 @@ void Socialnet::readFriendData(string friendFileName){
     ifstream friendfile(friendFileName);
     char buffer[100];
     int i=0;
-    cout<<"读取好友关系文件"<<endl;
+    cout<<"读取好友关系文件"<<friendFileName<<endl;
     int xxbug=0;
     while(xxbug<10000){
         // xxbug++;
@@ -106,7 +108,7 @@ Socialnet::~Socialnet(void)
     instanceCount=0;
 }
 
-Item * Socialnet::getItemPtrById(int id,int itemType,bool isAllowNewType){
+Item * Socialnet::getItemPtrById(int id,int itemType,bool isAllowNewType, float longitude, float latitude){
     ItemMap * itemList;
     if(itemType==ITEMTYPE_USER){
         itemList=&userList;
@@ -117,10 +119,15 @@ Item * Socialnet::getItemPtrById(int id,int itemType,bool isAllowNewType){
     if(iter!=itemList->end()){
         return iter->second;
     }
+
     if(isAllowNewType==false) return NULL;
 
-    Item * newItem=new Item(id,itemType);
+    Item * newItem=new Item(id, itemType);
     itemList->insert(ItemMap::value_type(id,newItem));
+    if (longitude != -1 && latitude != -1 &&itemType == ITEMTYPE_LOCATION)
+    {
+        newItem->insertLongLati(longitude,latitude);
+    }
     if (isDebug)
     {
         cout<<"创建一个新的ITEM"<<endl;
@@ -140,9 +147,9 @@ bool Socialnet::isNeighbor(int fromId,int fromItemType,int toId,int toItemType){
     }
 }
 
-void Socialnet::addCheckin(int userId,int locId){
+void Socialnet::addCheckin(int userId,int locId, float longitude, float latitude){
     Item * user=getItemPtrById(userId,ITEMTYPE_USER,ALLOW_INSERT_IF_NULL);
-    Item * loc=getItemPtrById(locId,ITEMTYPE_LOCATION,ALLOW_INSERT_IF_NULL);
+    Item * loc=getItemPtrById(locId,ITEMTYPE_LOCATION,ALLOW_INSERT_IF_NULL,longitude,latitude);
     //网络中插入用户-位置边数据
     user->addToLocE(locId,weightCpuType);
     loc->addToUserE(userId,weightCpuType);
@@ -184,5 +191,26 @@ void Socialnet::addFriend(int userId,int user2id){
             suser->print(ITEMTYPE_USER);
             cout<<"=================="<<endl;
         }
+    }
+}
+ItemMap * Socialnet::getLoclist(){
+    return & this->locList;
+}
+//TODO 
+void Socialnet::GetNearestLocListMap(ItemMap & locList,int locId){
+    Item * loc = getItemPtrById(locId, ITEMTYPE_LOCATION);
+    if (loc == NULL)
+    {
+        locList.clear();
+        return;
+    }
+    int locCount=0;
+    int mostFarDistance=0;
+    locList.clear();
+    return;
+
+    for(ItemMap::const_iterator lociter=locList.begin();lociter!=locList.end();++lociter){
+        Item * toLoc = lociter->second;
+        float dis=Socialnet::GetDistance(loc->getLongitude(), loc->getLatitude(), toLoc->getLongitude(), toLoc->getLatitude());
     }
 }
