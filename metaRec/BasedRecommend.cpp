@@ -162,7 +162,7 @@ void BasedRecommend::sortRecResult(map<int,float> &sortedRec,const map<int,float
             sortedRec.insert(map<int,float>::value_type(recIter->first,recIter->second));
             sortedCount++;
             if(sortedCount==N){
-                //K个满了，就存储最小的元素
+                //N个满了，就存储最小的元素
                 for(map<int,float>::const_iterator sorIter=sortedRec.begin();sorIter!=sortedRec.end();++sorIter){
                     if(sorIter->second<leastRanked){
                         leastRanked=sorIter->second;

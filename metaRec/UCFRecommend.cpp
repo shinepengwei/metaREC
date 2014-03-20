@@ -56,6 +56,7 @@ void UCFRecommend::Recommend(string fileName){
             if(allRec[0]!=0){
                 //cout<<"top-5:"<<endl;
                 //printMap(sortedRec1);
+                cout<<"UCFR"<<fileName<<endl;
                 cout<<" 精确率rightRec[0]/allRec[0]："<<rightRec[0]<<"/"<<allRec[0]<<" :"<<(float)rightRec[0]/allRec[0]<<endl;
                 cout<<"召回率rightRec[0]/rightCase"<<rightRec<<"/"<<rightCase<<" :"<<(float)rightRec[0]/rightCase<<endl;
                // cout<<"top-10:"<<endl;
@@ -125,6 +126,8 @@ void UCFRecommend::Recommend(string fileName){
         }
     }
     //计算精确率和召回率
+    cout<<"UCFR"<<fileName<<endl;
+    cout<<"完成："<<endl;
     cout<<"top-5:"<<endl;
     cout<<" 精确率："<<(float)rightRec[0]/allRec[0]<<endl;
     cout<<"召回率"<<(float)rightRec[0]/rightCase<<endl;

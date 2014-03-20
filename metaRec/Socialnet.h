@@ -1,15 +1,33 @@
 #pragma once
 #include "base.h"
 #include "Item.h"
+
+#define PI 3.141592653f
+#define EARTH_RADIUS 6378.137f
+class GeograRecommend;
+
 class Socialnet
 {
+    friend class GeograRecommend;
 private:
-    const double EARTH_RADIUS = 6378.137;//地球半径
-    const double PI = 3.141592653;
     static double rad(double d)
     {
         return d * PI / 180.0;
     }
+    
+
+public:
+    ~Socialnet(void);
+    Item * getItemPtrById(int id,int itemType,bool isAllowNewType=false, float longitude = -1, float latitude = -1);
+    bool isNeighbor(int fromId,int fromItemType,int toId,int toItemType);
+    static Socialnet * createSocialnet(string chinkinFileName,string friendFileName,
+        int weightCpuType=WEIGHTCPUTYPE_NORMAL,
+        bool hasLLRelation=true,
+        int time_iterval=24
+        ) ;
+    //TODO
+   
+    bool const hasLLRelation;
     //根据经纬度返回亮点的距离。
     static float GetDistance(float lng1, float lat1, float lng2, float lat2){
         double radLat1 = rad(lat1);
@@ -20,22 +38,9 @@ private:
         s = s * EARTH_RADIUS;
         return s;
     }
-
-public:
-    
-    ~Socialnet(void);
-    Item * getItemPtrById(int id,int itemType,bool isAllowNewType=false, float longitude = -1, float latitude = -1);
-    bool isNeighbor(int fromId,int fromItemType,int toId,int toItemType);
-    static Socialnet * createSocialnet(string chinkinFileName,string friendFileName,
-        int weightCpuType=WEIGHTCPUTYPE_NORMAL,
-        bool hasLLRelation=true,
-        int time_iterval=24
-        ) ;
-    //TODO
+private:
     void GetNearestLocListMap(ItemMap & locList,int locId);
     ItemMap * getLoclist();
-    bool const hasLLRelation;
-private:
     Socialnet(int,bool);
     void readCheckinData(string chinkinFileName);
     void readFriendData(string friendFileNmae);
@@ -53,4 +58,3 @@ private:
     static int instanceCount;//单例模式
     int time_iterval;
 };
-

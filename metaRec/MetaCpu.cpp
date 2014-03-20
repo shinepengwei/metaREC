@@ -109,7 +109,7 @@ void MetaCpu::metaCpu(string testDateFileName,string outputFileName){
             lastuserid=userid;
             lastPosCount=0;
              postiveStr="";
-        }
+        }//新user end
 
 
         //根据当前记录（user,location），以及获得的该用户的特征值集合，尝试添加一个正例

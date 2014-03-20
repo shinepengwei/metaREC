@@ -4,6 +4,7 @@
 #include<sstream>
 #include "UCFRecommend.h"
 #include "FriBasedRecommend.h"
+#include "GeograRecommend.h"
 using namespace std;
 //测试，用于DEBUG
 #define CHECKINDATA "d:\\data\\test\\testdata.txt"
@@ -32,6 +33,8 @@ using namespace std;
 #define TEST_FRIENDDATA "friends_edges.txt"
 #define TEST_CHECKTESTDATA "filter_testdata2.txt"
 
+#define TEST_CHECKTESTDATANAME "filter_testdata2"
+
 #define OUTPUTADRESS "d:\\data\\output\\"
 #define OUTPUTFILE "featuredata"
 int isDebug=0;
@@ -49,6 +52,9 @@ void main(){
           or DEBUG-3 \n\
           or 基于用户的协同过滤 -4 \n\
           or 基于好友的协同过滤 -5 \n\
+          or 位置相关的推荐 -6 \n\
+          or 综合推荐算法 -7 \n\
+          or 统计位置距离和签到概率 - 8\
           "<<endl;
     cin>>train_test;
     cout<<"Gowalla-1 or foursuare -2"<<endl;
@@ -66,43 +72,73 @@ void main(){
     }
     //string fileType=".txt";
     bool isTrain=true;
-    //选择处理数据文件
-    if (train_test==1)
-    {
-        train_testStr="train";
-        checkinFileName=INPUTADRESS+pis+TRAIN_CHECKINDATA;
-        friendFileName=INPUTADRESS+pis+TRAIN_FRIENDDATA;
-        caseFileName=INPUTADRESS+pis+TRAIN_CHECKTESTDATA;
-    }else if (train_test==2)
-    {
-        train_testStr="test";
-        checkinFileName=INPUTADRESS+pis+TEST_CHECKINDATA;
-        friendFileName=INPUTADRESS+pis+TEST_FRIENDDATA;
-        caseFileName=INPUTADRESS+pis+TEST_CHECKTESTDATA;
-        isTrain=false;
-    }else if (train_test==3)
-    {
-        isDebug=1;
-        checkinFileName=INPUTADRESS+pis+CHECKINDATA;
-        friendFileName=INPUTADRESS+pis+FRIENDDATA;
-        caseFileName=INPUTADRESS+pis+CHECKTESTDATA;
-        train_testStr="debug";
-    }else if (train_test == 4 || train_test == 5)
-    {
-        //传统的推荐算法——协同过滤所使用的数据和测试集使用的数据相同。
-        train_testStr="UBFR or FriendBased";
-        checkinFileName=INPUTADRESS+pis+TEST_CHECKINDATA;//CHECKINDATA;//
-        friendFileName=INPUTADRESS+pis+TEST_FRIENDDATA;//FRIENDDATA;//
-        caseFileName=INPUTADRESS+pis+TEST_CHECKTESTDATA;//CHECKTESTDATA;//
-        isTrain=false;
-
-    }
     int interval_hour=0;
-    if (train_test != 4 && train_test != 5)
+    //选择处理数据文件
+
+    switch (train_test)
     {
-        cout<<"请输入LL边的时间间隔（小时）："<<endl;
-        cin>>interval_hour;
+    case 1:
+        {
+            train_testStr="train";
+            checkinFileName=INPUTADRESS+pis+TRAIN_CHECKINDATA;
+            friendFileName=INPUTADRESS+pis+TRAIN_FRIENDDATA;
+            caseFileName=INPUTADRESS+pis+TRAIN_CHECKTESTDATA;
+            cout<<"请输入LL边的时间间隔（小时）："<<endl;
+            cin>>interval_hour;
+            break;
+        }
+    case 2:
+        {
+            train_testStr="test";
+            checkinFileName=INPUTADRESS+pis+TEST_CHECKINDATA;
+            friendFileName=INPUTADRESS+pis+TEST_FRIENDDATA;
+            caseFileName=INPUTADRESS+pis+TEST_CHECKTESTDATA;
+            cout<<"请输入LL边的时间间隔（小时）："<<endl;
+            cin>>interval_hour;
+            isTrain=false;
+            break;
+        }
+    case 3:
+        {
+            isDebug=1;
+            checkinFileName=INPUTADRESS+pis+CHECKINDATA;
+            friendFileName=INPUTADRESS+pis+FRIENDDATA;
+            caseFileName=INPUTADRESS+pis+CHECKTESTDATA;
+            cout<<"请输入LL边的时间间隔（小时）："<<endl;
+            cin>>interval_hour;
+            train_testStr="debug";
+            break;
+        }
+    case 4:
+    case 6:
+    case 7:
+        {
+            train_testStr="Based";
+            checkinFileName=INPUTADRESS+pis+TEST_CHECKINDATA;//CHECKINDATA;//
+            friendFileName=INPUTADRESS+pis+TEST_FRIENDDATA;//FRIENDDATA;//
+            int fileIndex=-1;
+            cout<<"请输入文件号码：1-11"<<endl;
+            cin>>fileIndex;
+            stringstream ss;
+            string s;
+            ss << fileIndex;
+            ss >> s;
+            caseFileName=INPUTADRESS+pis+TEST_CHECKTESTDATANAME+"_"+s+".txt";//CHECKTESTDATA;//
+            isTrain=false;
+            break;
+        }
+    case  5:
+    case 8:
+        {
+            train_testStr="Based";
+            checkinFileName=INPUTADRESS+pis+TEST_CHECKINDATA;//CHECKINDATA;//
+            friendFileName=INPUTADRESS+pis+TEST_FRIENDDATA;//FRIENDDATA;//
+            caseFileName=INPUTADRESS+pis+TEST_CHECKTESTDATA;//CHECKTESTDATA;//
+            isTrain=false;
+            break;
+        }
     }
+    
     
 
     
@@ -133,7 +169,17 @@ void main(){
     }else if (train_test == 5){
         FriBasedRecommend * friendeBasedRecommend = new FriBasedRecommend(socialNet);
         friendeBasedRecommend->Recommend(caseFileName);
-    }else{
+    }else if(train_test == 6){
+        GeograRecommend * geoRec = new GeograRecommend(socialNet);
+        geoRec->Recommend(caseFileName,false);
+    }else if (train_test == 7){
+        GeograRecommend * geoRec = new GeograRecommend(socialNet);
+        geoRec->Recommend(caseFileName,true);
+    }else if (train_test == 8){
+        GeograRecommend * geoRec = new GeograRecommend(socialNet);
+        geoRec->statistics("d:\\data\\output\\output_geoprobility.txt");
+    }else
+    {
         stringstream ss;
         string outputFileName;
         ss<<OUTPUTADRESS<<dateSourceStr<<OUTPUTFILE<<"_"<<weightCpuTypeStr<<"_"<<train_testStr<<"_"<<interval_hour<<"hours.txt";

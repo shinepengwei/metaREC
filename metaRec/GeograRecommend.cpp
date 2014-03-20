@@ -1,4 +1,5 @@
 #include "GeograRecommend.h"
+#include "Socialnet.h"
 #include "Item.h"
 #include "Edge.h"
 #include<sstream>
@@ -8,25 +9,65 @@
 #include <math.h>
 #define ISDEBUG 0
 //地理位置相关推荐中使用的系数，按说应该是通过线性拟合确定，先这样吧 - TODO
-#define A_PARAM_G 0.1
-#define B_PARAM_G -100
+#define A_PARAM_G 0.082976f
+#define B_PARAM_G -0.9693f
 //综合特征权重系数
-#define A_PARAM_USG 0.1
-#define B_PARAM_USG 0.2
-#define C_PARAM_USG 1-A_PARAM_USG-B_PARAM_USG
-
+#define U_PARAM_USG 0.1f//U
+#define S_PARAM_USG 0.2f
+#define G_PARAM_USG 1.0f - U_PARAM_USG - S_PARAM_USG
+float GeograRecommend::CalProbability(float distance){
+    return A_PARAM_G*(pow(distance,B_PARAM_G));
+}
 
 GeograRecommend::GeograRecommend(Socialnet* socNet):BasedRecommend(socNet)
 {
 }
+void GeograRecommend::statistics(string outPutFileName){
+    map<int, int> disCountStatic;
+    int allCount = 0;
+    for (ItemMap::const_iterator userIter = socialNet->userList.begin(); userIter != socialNet->userList.end(); ++userIter)
+    {
+        Item * user = userIter->second;
+        for (EdgeMap::const_iterator loc1Iter = user->getToLocE()->begin(); loc1Iter != user->getToLocE()->end(); ++loc1Iter)
+        {
+            Item* loc1 = socialNet->getItemPtrById(loc1Iter->first, ITEMTYPE_LOCATION);
+            for (EdgeMap::const_iterator loc2Iterator= loc1Iter; loc2Iterator != user->getToLocE()->end(); ++loc2Iterator)
+            {
+                Item* loc2 = socialNet->getItemPtrById(loc2Iterator->first, ITEMTYPE_LOCATION);
+                int dis = (int)(Socialnet::GetDistance(loc1->getLongitude(),loc1->getLatitude(), loc2->getLongitude(),loc2->getLatitude())+0.5);
+                disCountStatic[dis]++;
+                allCount++;
+            }
+        }
+    }
+    ofstream outfile(outPutFileName,ios::out);
+    for (map<int, int>::const_iterator iter = disCountStatic.begin(); iter!=disCountStatic.end();iter++)
+    {
+        outfile<<iter->first<<","<<((float)iter->second/allCount)<<endl;
+    }
+    
+}
 
 void GeograRecommend::CalRecResultForGEO(map<int,float>&recResult,int uid){
     Item * user = socialNet->getItemPtrById(uid,ITEMTYPE_USER);
-    EdgeMap * userLocList = user->getToLocE();
+    EdgeMap * userLocList = user->getToLocE();//用户访问过的位置
+    ItemMap* locList = socialNet->getLoclist();//所有位置
 
-    ItemMap* locList = socialNet->getLoclist();
     for(ItemMap::const_iterator locIter=locList->begin();locIter!=locList->end();++locIter){
+        //对于所有的位置，根据用户访问过的位置计算它和用户关联性
 
+        if(userLocList->find(locIter->first)!=userLocList->end()) continue;//如果用户i曾经访问过该位置，不推荐该位置
+        //cout<<"该Location已经计算过了
+        if(recResult.find(locIter->first)!=recResult.end())  continue;
+
+
+        float PrLjLi = 1.0f;
+        for (EdgeMap::const_iterator userLocIter = userLocList->begin(); userLocIter != userLocList->end(); ++userLocIter)
+        {
+            Item * loc = socialNet->getItemPtrById(userLocIter->first,ITEMTYPE_LOCATION);
+            PrLjLi *=CalProbability(Socialnet::GetDistance(locIter->second->getLongitude(),locIter->second->getLatitude(),loc->getLongitude(),loc->getLatitude()));
+        }
+        recResult.insert(map<int,float>::value_type(locIter->first,PrLjLi));
     }
 }
 void GeograRecommend::Recommend(string checkinDataFileName, bool isUSG){
@@ -82,7 +123,8 @@ void GeograRecommend::Recommend(string checkinDataFileName, bool isUSG){
                     cout<<"top-5:"<<endl;
                     printMap(sortedRec1);
                 }
-                cout<<" FriendBased精确率rightRec[0]/allRec[0]："<<rightRec[0]<<"/"<<allRec[0]<<" :"<<(float)rightRec[0]/allRec[0]<<endl;
+                cout<<"GEOGra"<<checkinDataFileName<<endl;
+                cout<<" GEOGra精确率rightRec[0]/allRec[0]："<<rightRec[0]<<"/"<<allRec[0]<<" :"<<(float)rightRec[0]/allRec[0]<<endl;
                 cout<<"召回率rightRec[0]/rightCase"<<rightRec<<"/"<<rightCase<<" :"<<(float)rightRec[0]/rightCase<<endl;
                 if(ISDEBUG){
                     cout<<"top-10:"<<endl;
@@ -117,13 +159,31 @@ void GeograRecommend::Recommend(string checkinDataFileName, bool isUSG){
                 calRecResult(recResultS,f2fWeightMap,userid);
             }
             
+            CalRecResultForGEO(recResultG,userid);
             
+            if (isUSG)
+            {
+                for (map<int,float>::iterator resIter = recResultG.begin(); resIter != recResultG.end(); ++resIter)
+                {
+                    float resultG = G_PARAM_USG * resIter->second;
+                    if (recResultU.find(resIter->first) != recResultU.end())
+                    {
+                        resultG += U_PARAM_USG * recResultU[resIter->first];
+                    }
+                    if (recResultS.find(resIter->first) != recResultS.end())
+                    {
+                        resultG += S_PARAM_USG * recResultS[resIter->first];
+                    }
+                    resIter->second = resultG;
+                }
+                
+            }
             
             //选择top-k个推荐结果
 
-            sortRecResult(sortedRec1,recResult,TOPN1);
-            sortRecResult(sortedRec2,recResult,TOPN2);
-            sortRecResult(sortedRec3,recResult,TOPN3);
+            sortRecResult(sortedRec1,recResultG,TOPN1);
+            sortRecResult(sortedRec2,recResultG,TOPN2);
+            sortRecResult(sortedRec3,recResultG,TOPN3);
             //cout<<"排序厚的推荐结果：（位置ID，推荐度）"<<userid<<endl;
             allRec[0]+=TOPN1;
             allRec[1]+=TOPN2;
@@ -158,7 +218,9 @@ void GeograRecommend::Recommend(string checkinDataFileName, bool isUSG){
         }
     }
     //计算精确率和召回率
-    cout<<"FriendBased top-5:"<<endl;
+    cout<<checkinDataFileName<<endl;
+    cout<<"完成："<<endl;
+    cout<<"GEOGra top-5:"<<endl;
     cout<<" 精确率："<<(float)rightRec[0]/allRec[0]<<endl;
     cout<<"召回率"<<(float)rightRec[0]/rightCase<<endl;
     cout<<"top-10:"<<endl;

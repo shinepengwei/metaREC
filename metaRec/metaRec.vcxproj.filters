@@ -39,6 +39,9 @@
     <ClInclude Include="FriBasedRecommend.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="GeograRecommend.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="item.cpp">
@@ -66,6 +69,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="FriBasedRecommend.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GeograRecommend.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
