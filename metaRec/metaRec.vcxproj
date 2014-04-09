@@ -64,9 +64,11 @@
     <ClInclude Include="BasedRecommend.h" />
     <ClInclude Include="Edge.h" />
     <ClInclude Include="FriBasedRecommend.h" />
+    <ClInclude Include="FriendRecAAN.h" />
     <ClInclude Include="GeograRecommend.h" />
     <ClInclude Include="item.h" />
     <ClInclude Include="MetaCpu.h" />
+    <ClInclude Include="MetaCpuForFriendRec.h" />
     <ClInclude Include="Socialnet.h" />
     <ClInclude Include="UCFRecommend.h" />
   </ItemGroup>
@@ -74,10 +76,12 @@
     <ClCompile Include="BasedRecommend.cpp" />
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="FriBasedRecommend.cpp" />
+    <ClCompile Include="FriendRecAAN.cpp" />
     <ClCompile Include="GeograRecommend.cpp" />
     <ClCompile Include="item.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MetaCpu.cpp" />
+    <ClCompile Include="MetaCpuForFriendRec.cpp" />
     <ClCompile Include="Socialnet.cpp" />
     <ClCompile Include="tool.cpp" />
     <ClCompile Include="UCFRecommend.cpp" />

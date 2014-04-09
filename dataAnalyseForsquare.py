@@ -12,9 +12,7 @@ loc_checkin_table=xlsfile.add_sheet('loc_checkin_count')
 user_checkin_table=xlsfile.add_sheet('user_checkin_count')
 locr_table=xlsfile.add_sheet('locr_count')
 
-f=open("J:\\checkin\\CheckinNewYorkOfUserNewYork.csv",'r')
-#trainf=open("d:\\trainfilter2.txt",'w+')
-#testf=open("d:\\testfilter2.txt",'w+')
+f=open("J:\\checkin\\filter_allCheckinNewYork.txt",'r')
 
 locr={0:{0:0}}
 user_loc={0:{0:0}}
@@ -36,6 +34,8 @@ lastuserid=arr[1]
 lastlocid=arr[3]
 
 i=0
+
+time={0:0}
 while True:
     newline=f.readline()
     if newline=='':
@@ -54,7 +54,6 @@ while True:
         trainf.write(newline)
         trainc=trainc+1
     '''
-
 
 
     #统计每个用户的签到次数

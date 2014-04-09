@@ -32,7 +32,7 @@ void Socialnet::readCheckinData(string chinkinFileName){
     int lastUserId=0,lastLocId=0,lastTimeSec=0;//用于判断比较获得位置-位置边
     //根据用户的签到信息，读用户、位置节点信息以及用户-位置和位置-位置的边信息
     cout<<"读取签到文件:"<<chinkinFileName<<endl;
-    while(true){
+    while(i<4000000){
         i++;
         if(i%100000==0) cout<<i<<",";
         if(checkinfile.eof()){
@@ -45,14 +45,16 @@ void Socialnet::readCheckinData(string chinkinFileName){
         //一行字符串分割后转意
         struct tm t; 
         t.tm_year=atoi(result[1].substr(0,4).data())-1900;
-        t.tm_mon=atoi(result[1].substr(5,2).data()-1);
+        t.tm_mon=atoi(result[1].substr(5,2).data())-1;
         t.tm_mday=atoi(result[1].substr(8,2).data());
         t.tm_hour=atoi(result[1].substr(11,2).data());
-        t.tm_min=atoi(result[1].substr(13,2).data());
-        t.tm_sec=atoi(result[1].substr(15,2).data());
+        t.tm_min=atoi(result[1].substr(14,2).data());
+        t.tm_sec=atoi(result[1].substr(17,2).data());
+        
         t.tm_isdst=0;
         time_t tsec;
         tsec=mktime(&t);
+        if (isDebug) cout<<"时间:"<<t.tm_year<<"年"<<t.tm_mon<<"月"<<t.tm_mday<<"日"<<t.tm_hour<<"时"<<t.tm_min<<"分:"<<tsec<<endl;
         int userid=atoi(result[0].data());
         int locid=atoi(result[4].data());
 

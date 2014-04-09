@@ -113,6 +113,7 @@ void Item::addToUserE(int id,int weightCPUType,int time){
 
 
 void Item::print(int itemtype,int kongbaiCount){
+    itemtype=this->type;
     string kongbai="     ";
     string kongbaijianyi="";
     while (kongbaiCount>0)

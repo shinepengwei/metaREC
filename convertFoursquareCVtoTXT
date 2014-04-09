@@ -13,10 +13,8 @@ def timeNum(year,month):
 
 f=open("J:\\checkin\\CheckinNewYorkOfUserNewYork.csv",'r')
 
-trainf1=open("d:\\data\\output\\traindata1_foursquare.txt",'w')
-trainf2=open("d:\\data\\output\\traindata2_foursquare.txt",'w')
-testf1=open("d:\\data\\output\\testdata1_foursquare.txt",'w')
-testf2=open("d:\\data\\output\\testdata2_foursquare.txt",'w')
+fout=open("d:\\checkin\\CheckinNewYorkOfUserNewYork.txt",'w')
+
 
 
 testc1=0
