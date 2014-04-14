@@ -7,6 +7,8 @@
 class BasedRecommend
 {
 protected:
+    map<int, map<int,float>> allf2fWeight;
+
     Socialnet * socialNet;
     void calRecResult(map<int,float>&recResult,const map<int,float> & u2uWeightMap,int uid);
     void sortRecResult(map<int,float> &sortedRec,const map<int,float> &recResult,int N=20);

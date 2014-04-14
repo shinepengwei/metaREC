@@ -12,8 +12,8 @@
 #define A_PARAM_G 0.082976f
 #define B_PARAM_G -0.9693f
 //综合特征权重系数
-#define U_PARAM_USG 0.1f//U
-#define S_PARAM_USG 0.2f
+#define U_PARAM_USG 0.2f//U
+#define S_PARAM_USG 0.1f//S
 #define G_PARAM_USG 1.0f - U_PARAM_USG - S_PARAM_USG
 float GeograRecommend::CalProbability(float distance){
     return A_PARAM_G*(pow(distance,B_PARAM_G));
@@ -56,7 +56,7 @@ void GeograRecommend::CalRecResultForGEO(map<int,float>&recResult,int uid){
     for(ItemMap::const_iterator locIter=locList->begin();locIter!=locList->end();++locIter){
         //对于所有的位置，根据用户访问过的位置计算它和用户关联性
 
-        if(userLocList->find(locIter->first)!=userLocList->end()) continue;//如果用户i曾经访问过该位置，不推荐该位置
+        //if(userLocList->find(locIter->first)!=userLocList->end()) continue;//如果用户i曾经访问过该位置，不推荐该位置
         //cout<<"该Location已经计算过了
         if(recResult.find(locIter->first)!=recResult.end())  continue;
 
@@ -125,19 +125,19 @@ void GeograRecommend::Recommend(string checkinDataFileName, bool isUSG){
                 }
                 cout<<"GEOGra"<<checkinDataFileName<<endl;
                 cout<<" GEOGra精确率rightRec[0]/allRec[0]："<<rightRec[0]<<"/"<<allRec[0]<<" :"<<(float)rightRec[0]/allRec[0]<<endl;
-                cout<<"召回率rightRec[0]/rightCase"<<rightRec<<"/"<<rightCase<<" :"<<(float)rightRec[0]/rightCase<<endl;
+                cout<<"召回率rightRec[0]/rightCase："<<rightRec<<"/"<<rightCase<<" :"<<(float)rightRec[0]/rightCase<<endl;
                 if(ISDEBUG){
                     cout<<"top-10:"<<endl;
                     printMap(sortedRec2);
                 }
                 cout<<" 精确率rightRec[1]/allRec[1]："<<rightRec[1]<<"/"<<allRec[1]<<" :"<<(float)rightRec[1]/allRec[1]<<endl;
-                cout<<"召回率rightRec[1]/rightCase"<<rightRec[1]<<"/"<<rightCase<<" :"<<(float)rightRec[1]/rightCase<<endl;
+                cout<<"召回率rightRec[1]/rightCase："<<rightRec[1]<<"/"<<rightCase<<" :"<<(float)rightRec[1]/rightCase<<endl;
                 if(ISDEBUG){
                     cout<<"top-20:"<<endl;
                     printMap(sortedRec3);
                 }
                 cout<<" 精确率rightRec[2]/allRec[2]："<<rightRec[2]<<"/"<<allRec[2]<<" :"<<(float)rightRec[2]/allRec[2]<<endl;
-                cout<<"召回率rightRec[1]/rightCase"<<rightRec[2]<<"/"<<rightCase<<" :"<<(float)rightRec[2]/rightCase<<endl;
+                cout<<"召回率rightRec[1]/rightCase："<<rightRec[2]<<"/"<<rightCase<<" :"<<(float)rightRec[2]/rightCase<<endl;
             }
             //计算这个新的user的推荐信息
             //首先清除一些东西

@@ -1,6 +1,6 @@
 # -*- coding: cp936 -*-
-f=open("E:\\checkin\\result\\foursquare_all_featuredata_log_train_4hours.txt",'r')
-ft=open("E:\\checkin\\result\\foursquare_all_featuredata_log_train_4hours_new.txt",'w+')
+f=open("E:\\checkin\\result\\gowalla_featuredata_log_test_4hours.txt",'r')
+ft=open("E:\\checkin\\result\\gowalla_featuredata_log_test_4hours_new.txt",'w+')
 while True:
     newline=f.readline()
     if ""==newline:

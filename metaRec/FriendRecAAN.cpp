@@ -5,23 +5,53 @@
 #include<iostream>
 #include<fstream>
 #include <set>
+#include <math.h>
 
 FriendRecAAN::FriendRecAAN(Socialnet* socNet):BasedRecommend(socNet)
 {
+
 }
 
 
 FriendRecAAN::~FriendRecAAN(void)
 {
 }
-void calRecResult(map<int,float>* recResult,int user1id){
-    
+void FriendRecAAN::calRecResult(map<int,float>* recResult,int user1id){
+    Item * user1 = this->socialNet->getItemPtrById(user1id,ITEMTYPE_USER);
+    for (EdgeMap::const_iterator user1friendsIter = user1->getToUserE()->begin(); user1friendsIter != user1->getToUserE()->end(); ++user1friendsIter){
+        Item * user1friend = socialNet->getItemPtrById(user1friendsIter->first,ITEMTYPE_USER);
+        for (EdgeMap::const_iterator user2Iter = user1friend->getToUserE()->begin();user2Iter != user1friend->getToUserE()->end(); ++user2Iter){
+            Item * user2 = socialNet->getItemPtrById(user2Iter->first, ITEMTYPE_USER);
+            if (recResult->find(user2->getId()) == recResult->end())
+            {
+                //已经计算过了
+                continue;
+            }
+            //对于用户user1，计算他和其所有的朋友的朋友(user2)之间的相似度
+            if (this->aanFeature.find(user2->getId()) != aanFeature.end())
+            {
+                //曾经计算过user2和user1的，与user1和user2的相同
+                recResult->insert(map<int,float>::value_type(user2->getId(),aanFeature[user2->getId()]->at(user1id)));
+            }else{
+                //没有计算过
+                float resultf = 0.0f;
+                for (EdgeMap::const_iterator user1friendsIterForCal = user1->getToUserE()->begin(); user1friendsIterForCal != user1->getToUserE()->end(); ++user1friendsIterForCal){
+                    if (user2->getToUserE()->find(user1friendsIterForCal->first) != user2->getToUserE()->end())
+                    {
+                        Item * coFriend = socialNet->getItemPtrById(user1friendsIterForCal->first,ITEMTYPE_USER);
+                        resultf += 1.0f/log((double)coFriend->getToLocE()->size());
+                    }
+                }
+                recResult->insert(map<int,float>::value_type(user2->getId(),resultf));
+            }
+        }
+    }
+    aanFeature.insert(map<int, map<int,float>*>::value_type(user1id,recResult));
 }
 
-void FriendRecAAN::Recommend(string checkinDataFileName){
-    /*
-    cout<<checkinDataFileName<<endl;
-    ifstream testfile(checkinDataFileName);
+void FriendRecAAN::Recommend(string friendData2FileName){
+    cout<<friendData2FileName<<endl;
+    ifstream testfile(friendData2FileName);
 
     char buffer[100];
     int i=0;
@@ -61,7 +91,7 @@ void FriendRecAAN::Recommend(string checkinDataFileName){
             if(allRec[0]!=0){
                 //cout<<"top-5:"<<endl;
                 //printMap(sortedRec1);
-                cout<<"friendrec_aan"<<checkinDataFileName<<endl;
+                cout<<"friendrec_aan"<<friendData2FileName<<endl;
                 cout<<" 精确率rightRec[0]/allRec[0]："<<rightRec[0]<<"/"<<allRec[0]<<" :"<<(float)rightRec[0]/allRec[0]<<endl;
                 cout<<"召回率rightRec[0]/rightCase"<<rightRec<<"/"<<rightCase<<" :"<<(float)rightRec[0]/rightCase<<endl;
                 // cout<<"top-10:"<<endl;
@@ -79,51 +109,52 @@ void FriendRecAAN::Recommend(string checkinDataFileName){
             sortedRec2.clear();
             sortedRec3.clear();
 
-
+            
             //计算用户对未评价的ITEM的隐含评价，以此作为推荐结果
+            recResult = new map<int,float>();
             calRecResult(recResult,user1id);
-            cout<<"推荐结果：（位置ID，推荐度）"<<user1id<<endl;
+            //cout<<"推荐结果：（位置ID，推荐度）"<<user1id<<endl;
             //printMap(recResult);
 
             //选择top-k个推荐结果
             sortRecResult(sortedRec1,*recResult,TOPN1);
             sortRecResult(sortedRec2,*recResult,TOPN2);
             sortRecResult(sortedRec3,*recResult,TOPN3);
-            cout<<"排序厚的推荐结果：（位置ID，推荐度）"<<userid<<endl;
+            cout<<"排序厚的推荐结果：（位置ID，推荐度）"<<user1id<<endl;
             //printMap(sortedRec1);
             allRec[0]+=TOPN1;
             allRec[1]+=TOPN2;
             allRec[2]+=TOPN3;
-            lastUserId=userid;
+            lastUserId=user1id;
         }
         //计算精确率和召回率
         //第一步统计推荐正确的数量
-        if(sortedRec1.find(locid)!=sortedRec1.end()){
-            if(sortedRec1[locid]!=-1){
+        if(sortedRec1.find(user2id)!=sortedRec1.end()){
+            if(sortedRec1[user2id]!=-1){
                 rightRec[0]++;
-                sortedRec1[locid]=-1;
+                sortedRec1[user2id]=-1;
             }
         }
-        if(sortedRec2.find(locid)!=sortedRec2.end()){
-            if(sortedRec2[locid]!=-1){
+        if(sortedRec2.find(user2id)!=sortedRec2.end()){
+            if(sortedRec2[user2id]!=-1){
                 rightRec[1]++;
-                sortedRec2[locid]=-1;
+                sortedRec2[user2id]=-1;
             }
         }
-        if(sortedRec3.find(locid)!=sortedRec3.end()){
-            if(sortedRec3[locid]!=-1){
+        if(sortedRec3.find(user2id)!=sortedRec3.end()){
+            if(sortedRec3[user2id]!=-1){
                 rightRec[2]++;
-                sortedRec3[locid]=-1;
+                sortedRec3[user2id]=-1;
             }
         }
-
+        /*
         if(locIdSet.find(locid)==locIdSet.end()){
             rightCase++;
             locIdSet.insert(locid);
-        }
+        }*/
     }
     //计算精确率和召回率
-    cout<<"UCFR"<<fileName<<endl;
+    cout<<"FriendRecAAN"<<friendData2FileName<<endl;
     cout<<"完成："<<endl;
     cout<<"top-5:"<<endl;
     cout<<" 精确率："<<(float)rightRec[0]/allRec[0]<<endl;
@@ -134,6 +165,4 @@ void FriendRecAAN::Recommend(string checkinDataFileName){
     cout<<"top-20:"<<endl;
     cout<<" 精确率："<<(float)rightRec[2]/allRec[2]<<endl;
     cout<<"召回率"<<(float)rightRec[2]/rightCase<<endl;
-    }
-    */
 }

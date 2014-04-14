@@ -6,6 +6,7 @@
 #include "FriBasedRecommend.h"
 #include "GeograRecommend.h"
 #include "MetaCpuForFriendRec.h"
+#include "FriendRecAAN.h"
 using namespace std;
 //测试，用于DEBUG
 #define CHECKINDATA "d:\\data\\test\\testCheckindata.txt"
@@ -52,11 +53,11 @@ using namespace std;
 
 
 //用于好友推荐
-#define FRIENDREC_CHECKINDATE "processedChekins.TXT"
+#define FRIENDREC_CHECKINDATE "allcheckin.TXT"
 
 //用于好友推荐的训练集
-#define FRIENDREC_TRAINFRIENDDATE "friends_testdata1.TXT"
-#define FRIENDREC_TRAINFRIENDDATE_2 "friends_testdata2.txt"
+#define FRIENDREC_TRAINFRIENDDATE "friends_traindata1.TXT"
+#define FRIENDREC_TRAINFRIENDDATE_2 "friends_traindata2.txt"
 
 //测试集
 #define FRIENDREC_TESTFRIENDDATE "friends_testdata1.TXT"
@@ -92,7 +93,9 @@ void main(){
           or 训练集 -9 \n \
           or 测试集- 10 \n \
           or DEBUG-11 \n\
+          or 基于共同好友的好友推荐（aa_n） 12 \n  \
           "<<endl;
+
     cin>>train_test;
     cout<<"foursquare_NewYork_-1 or foursquare_all_ -2 gowalla_ -3"<<endl;
     int dateSource=1;
@@ -165,6 +168,15 @@ void main(){
             ss << fileIndex;
             ss >> s;
             caseFileName=INPUTADRESS+pis+TEST_CHECKTESTDATANAME+"_"+s+".txt";//CHECKTESTDATA;//
+            isTrain=false;
+            break;
+        }
+    case 12:
+        {
+            train_testStr="aa_n";
+            checkinFileName=INPUTADRESS+pis+FRIENDREC_CHECKINDATE;//CHECKINDATA;//
+            friendFileName=INPUTADRESS+pis+FRIENDREC_TESTFRIENDDATE;//FRIENDDATA;//
+            caseFileName=INPUTADRESS+pis+FRIENDREC_TESTFRIENDDATE_2;//CHECKTESTDATA;//
             isTrain=false;
             break;
         }
@@ -261,6 +273,12 @@ void main(){
             ss>>outputFileName;
             MetaCpuForFriendRec *metaCpu=new MetaCpuForFriendRec(socialNet,isTrain,true);
             metaCpu->metaCpu(caseFileName,outputFileName,ITEMTYPE_USER);
+            break;
+        }
+    case 12:
+        {
+            FriendRecAAN * frAANRec = new FriendRecAAN(socialNet);
+            frAANRec->Recommend(caseFileName);
             break;
         }
     case 4:

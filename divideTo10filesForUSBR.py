@@ -5,7 +5,7 @@
 
 
 path="E:\\checkin\\"
-fname="gowalla_testdata2"
+fname="foursquare_all_testdata2"
 print path+fname+".txt"
 f=open(path+fname+".txt",'r')
 fout = {}
@@ -16,7 +16,8 @@ while i<11:
     i = i+ 1
 
 linecount = 0
-i =0
+
+i =0
 while True:
     i = i +1
     if i%10000==0:
@@ -28,7 +29,8 @@ while True:
 
 print "linecount:"+str(linecount)
 foutline = linecount / 10
-i =0
+
+i =0
 
 f.seek(0)
 while True:
@@ -42,6 +44,8 @@ while True:
     fout[index].write(newline)
 
 f.close()
-i =0
+
+i =0
 while i<11:
     fout[i].close()
+    i = i + 1
