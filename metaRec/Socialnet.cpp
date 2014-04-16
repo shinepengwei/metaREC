@@ -2,6 +2,7 @@
 #include<fstream>
 #include <iostream>
 #include<ctime>
+#include "atltime.h"
 extern int isDebug;
 
 //处理文件用到的字符串分割函数,定义在tool.cpp
@@ -54,6 +55,9 @@ void Socialnet::readCheckinData(string chinkinFileName){
         t.tm_isdst=0;
         time_t tsec;
         tsec=mktime(&t);
+        CTime ct(tsec);
+        int dayOfWeek = ct.GetDayOfWeek();
+        int hourOfDay = ct.GetHour();
         if (isDebug) cout<<"时间:"<<t.tm_year<<"年"<<t.tm_mon<<"月"<<t.tm_mday<<"日"<<t.tm_hour<<"时"<<t.tm_min<<"分:"<<tsec<<endl;
         int userid=atoi(result[0].data());
         int locid=atoi(result[4].data());
@@ -62,7 +66,7 @@ void Socialnet::readCheckinData(string chinkinFileName){
         float longitude = atof(result[3].data());
         float latitude = atof(result[2].data());
         //插入签到数据
-        addCheckin(userid,locid,longitude,latitude);
+        addCheckin(userid,locid,longitude,latitude,tsec);
 
 
         //插入位置-位置边数据
@@ -149,12 +153,12 @@ bool Socialnet::isNeighbor(int fromId,int fromItemType,int toId,int toItemType){
     }
 }
 
-void Socialnet::addCheckin(int userId,int locId, float longitude, float latitude){
+void Socialnet::addCheckin(int userId,int locId, float longitude, float latitude,int checkinTime){
     Item * user=getItemPtrById(userId,ITEMTYPE_USER,ALLOW_INSERT_IF_NULL);
     Item * loc=getItemPtrById(locId,ITEMTYPE_LOCATION,ALLOW_INSERT_IF_NULL,longitude,latitude);
     //网络中插入用户-位置边数据
-    user->addToLocE(locId,weightCpuType);
-    loc->addToUserE(userId,weightCpuType);
+    user->addToLocE(locId,weightCpuType,checkinTime);
+    loc->addToUserE(userId,weightCpuType,checkinTime);
     if (isDebug)
     {
         cout<<"添加用户-位置边:user-"<<userId<<",loc-"<<locId<<endl;

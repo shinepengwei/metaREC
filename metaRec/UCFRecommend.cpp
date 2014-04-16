@@ -5,8 +5,9 @@
 #include<iostream>
 #include<fstream>
 #include <set>
-
-
+#define TOPN_1 10
+#define TOPN_2 20
+#define TOPN_3 40
 UCFRecommend::UCFRecommend(Socialnet* socNet):BasedRecommend(socNet)
 {
 }
@@ -89,9 +90,9 @@ void UCFRecommend::Recommend(string fileName){
             //printMap(recResult);
 
             //选择top-k个推荐结果
-            sortRecResult(sortedRec1,recResult,TOPN1);
-            sortRecResult(sortedRec2,recResult,TOPN2);
-            sortRecResult(sortedRec3,recResult,TOPN3);
+            sortRecResult(sortedRec1,recResult,TOPN_1);
+            sortRecResult(sortedRec2,recResult,TOPN_2);
+            sortRecResult(sortedRec3,recResult,TOPN_3);
             cout<<"排序厚的推荐结果：（位置ID，推荐度）"<<userid<<endl;
             //printMap(sortedRec1);
             allRec[0]+=TOPN1;

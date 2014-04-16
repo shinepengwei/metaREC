@@ -15,7 +15,7 @@ Edge::~Edge(void)
 }
 void Edge::addEdge(int time)
 {
-   // this->time.push_back(time);   
+    this->checkinTimes.push_back(time);   
     this->count++;
 }
 void Edge::addEdge()

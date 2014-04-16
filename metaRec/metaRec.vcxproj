@@ -64,6 +64,7 @@
     <ClInclude Include="BasedRecommend.h" />
     <ClInclude Include="Edge.h" />
     <ClInclude Include="FriBasedRecommend.h" />
+    <ClInclude Include="FriendRecAAENT.h" />
     <ClInclude Include="FriendRecAAN.h" />
     <ClInclude Include="GeograRecommend.h" />
     <ClInclude Include="item.h" />
@@ -76,6 +77,7 @@
     <ClCompile Include="BasedRecommend.cpp" />
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="FriBasedRecommend.cpp" />
+    <ClCompile Include="FriendRecAAENT.cpp" />
     <ClCompile Include="FriendRecAAN.cpp" />
     <ClCompile Include="GeograRecommend.cpp" />
     <ClCompile Include="item.cpp" />

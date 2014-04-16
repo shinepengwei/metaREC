@@ -27,6 +27,25 @@ void Item::insertLongLati(float longitude, float latitude){
     this->longitude = longitude;
     this->latitude = latitude;
 }
+
+float Item::getLocEntropy(){
+    if (this->getType() == ITEMTYPE_USER)
+    {
+        cout<<"err:"<<endl;
+        int i;
+        cin>>i;
+        return -1;
+    }
+    int allCheckinCount = this->getAllWeight(ITEMTYPE_USER);
+    float out_entropy = 0.0f;
+    for(EdgeMap::const_iterator iter=this->toUserE.begin();iter!=toUserE.end();++iter){
+        float qik=iter->second->getWeight()/allCheckinCount;
+        out_entropy+= -qik*log(qik);
+    }
+    return out_entropy;
+}
+
+
 float Item::getLongitude(){
     return this->longitude;
 }

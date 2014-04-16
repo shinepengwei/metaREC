@@ -8,12 +8,12 @@
 #include <set>
 #include <math.h>
 #define ISDEBUG 0
-//地理位置相关推荐中使用的系数，按说应该是通过线性拟合确定，先这样吧 - TODO
+//地理位置相关推荐中使用的系数，通过线性拟合确定
 #define A_PARAM_G 0.082976f
 #define B_PARAM_G -0.9693f
 //综合特征权重系数
-#define U_PARAM_USG 0.2f//U
-#define S_PARAM_USG 0.1f//S
+#define U_PARAM_USG 0.3f//U
+#define S_PARAM_USG 0.2f//S
 #define G_PARAM_USG 1.0f - U_PARAM_USG - S_PARAM_USG
 float GeograRecommend::CalProbability(float distance){
     return A_PARAM_G*(pow(distance,B_PARAM_G));

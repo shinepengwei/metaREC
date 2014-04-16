@@ -1,4 +1,5 @@
 #pragma once
+#include <list>
 class Edge
 {
 public:
@@ -12,5 +13,7 @@ private:
     int weightCPUType;//权重计算方法
     int count;//边的次数。
     int type;//边的类型
+
+    list<int> checkinTimes;
 };
 

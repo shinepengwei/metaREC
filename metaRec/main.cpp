@@ -28,7 +28,7 @@ using namespace std;
 */
 //#define INPUTADRESS "d:\\data\\input\\"
 
-#define INPUTADRESS "e:\\checkin\\"
+#define INPUTADRESS "g:\\checkin\\"
 
 //生成测试集：
 #define TRAIN_CHECKINDATA "traindata1.txt"
@@ -44,7 +44,7 @@ using namespace std;
 
 #define TEST_CHECKTESTDATANAME "testdata2"
 
-#define OUTPUTADRESS "e:\\checkin\\"
+#define OUTPUTADRESS "g:\\checkin\\"
 #define OUTPUTFILE "featuredata"
 
 
@@ -59,7 +59,7 @@ using namespace std;
 #define FRIENDREC_TRAINFRIENDDATE "friends_traindata1.TXT"
 #define FRIENDREC_TRAINFRIENDDATE_2 "friends_traindata2.txt"
 
-//测试集
+//测试集test_
 #define FRIENDREC_TESTFRIENDDATE "friends_testdata1.TXT"
 #define FRIENDREC_TESTFRIENDDATE_2 "friends_testdata2.txt"
 
@@ -173,11 +173,16 @@ void main(){
         }
     case 12:
         {
+            //pis="";
             train_testStr="aa_n";
+            /*checkinFileName=INPUTADRESS+pis+FRIENDREC_CHECKINDATE;//CHECKINDATA;//
+            friendFileName=INPUTADRESS+pis+FRIENDREC_TESTFRIENDDATE;//FRIENDDATA;//
+            caseFileName=INPUTADRESS+pis+FRIENDREC_TESTFRIENDDATE_2;//CHECKTESTDATA;//
+            */
             checkinFileName=INPUTADRESS+pis+FRIENDREC_CHECKINDATE;//CHECKINDATA;//
             friendFileName=INPUTADRESS+pis+FRIENDREC_TESTFRIENDDATE;//FRIENDDATA;//
             caseFileName=INPUTADRESS+pis+FRIENDREC_TESTFRIENDDATE_2;//CHECKTESTDATA;//
-            isTrain=false;
+            isTrain=true;
             break;
         }
     case  5:

@@ -33,6 +33,7 @@ weight=[0.7979,1.8155,133.7793,30.6517,92.3578,27.5262,0.0842]
 
 f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_4hours.txt",'r')
 weight=[ 46.9529,114.0446,1021.8946,230.0309,304.527,108.9359,0.1586]
+
 #no - ll
 f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_4hours.txt",'r')
 weight=[ 49.8306,125.5997,898.876,0,0,0,0.1594] 
@@ -40,18 +41,24 @@ weight=[ 49.8306,125.5997,898.876,0,0,0,0.1594]
 f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_4hours.txt",'r')
 weight=[ 115.5997,0.7979,698.876,0,0,0,0.1594]
 
+'''
 
-
-#Foursquare-ALL
+#Foursquare-ALL 
+'''
 f=open("E:\\checkin\\result\\foursquare_all_featuredata_normal_test_4hours.txt",'r')
 weight=[ 33.9048,56.3842,592.2153,48.5725,349.328,20.3929, 0.1512]
 f=open("E:\\checkin\\result\\foursquare_all_featuredata_binary_test_4hours.txt",'r')
 weight=[ 63.2306,112.764,1060.1232,68.3359,276.8421,46.9454, 0.2135]
 f=open("E:\\checkin\\result\\foursquare_all_featuredata_log_test_4hours.txt",'r')
 weight=[ 1.8949,1.4017,322.5896,22.9564,72.0895,9.9466, 0.0957]
+no-ll
+f=open("E:\\checkin\\result\\foursquare_all_featuredata_binary_test_4hours.txt",'r')
+weight=[ 47.1213,142.4506,423.2357,0,0,0, 0.2062]
 
 
+'''
 #Gowalla
+'''
 f=open("E:\\checkin\\result\\gowalla_featuredata_binary_test_4hours.txt",'r')
 weight=[  8.8539,25.8855,487.6918,2.0132,167.649,28.1172, 0.3214]
 f=open("E:\\checkin\\result\\gowalla_featuredata_log_test_4hours.txt",'r')
@@ -64,10 +71,13 @@ weight=[ 1.496,
          215.8752,
          7.9142,
           0.2393]
+no-ll
+f=open("E:\\checkin\\result\\gowalla_featuredata_binary_test_4hours.txt",'r')
+weight=[ 12.8056,407.5661,143.2343,0,0,0,0.1044]
 '''
 
-f=open("E:\\checkin\\result\\gowalla_featuredata_binary_test_4hours.txt",'r')
-weight=[ 2.8056,17.5661,143.2343,0,0,0,0.3044]
+f=open("E:\\checkin\\result\\foursquare_all_featuredata_binary_test_4hours.txt",'r')
+weight=[ 47.1213,142.4506,423.2357,0,0,0, 0.2062]
 
 
 def calculateResult(x1,x2,x3,x4,x5,x6):

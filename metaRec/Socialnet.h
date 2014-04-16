@@ -44,7 +44,7 @@ private:
     Socialnet(int,bool);
     void readCheckinData(string chinkinFileName);
     void readFriendData(string friendFileNmae);
-    void addCheckin(int userId,int locId, float longitude, float latitude);
+    void addCheckin(int userId,int locId, float longitude, float latitude,int checkinTime);
     void addFriend(int userId,int user2Id);
     void addLLRelation(int locId,int locId2);
     

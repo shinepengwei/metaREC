@@ -8,6 +8,9 @@ public:
     void print(int type,int kongbaiCount=0);
     void insertLongLati(float longitude, float latitude);
 
+    //获取位置熵，用于朋友推荐
+    float getLocEntropy();
+
     //获得边集合的不同接口
     EdgeMap* getToLocE() ;
     EdgeMap* getToUserE() ;
@@ -26,6 +29,7 @@ public:
     float getAllWeight(int type);
     int getId();
     int getType();
+
 
 
 
