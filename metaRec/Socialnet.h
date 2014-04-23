@@ -47,6 +47,7 @@ private:
     void addCheckin(int userId,int locId, float longitude, float latitude,int checkinTime);
     void addFriend(int userId,int user2Id);
     void addLLRelation(int locId,int locId2);
+    int getWindowTime(int dayOfWeek, int hourOfDay);
     
 private:
     ItemMap userList;

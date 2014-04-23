@@ -7,6 +7,7 @@
 #include "GeograRecommend.h"
 #include "MetaCpuForFriendRec.h"
 #include "FriendRecAAN.h"
+#include "FriendRecAAENT.h"
 using namespace std;
 //测试，用于DEBUG
 #define CHECKINDATA "d:\\data\\test\\testCheckindata.txt"
@@ -28,7 +29,7 @@ using namespace std;
 */
 //#define INPUTADRESS "d:\\data\\input\\"
 
-#define INPUTADRESS "g:\\checkin\\"
+#define INPUTADRESS "e:\\checkin\\"
 
 //生成测试集：
 #define TRAIN_CHECKINDATA "traindata1.txt"
@@ -92,8 +93,11 @@ void main(){
           朋友推荐：\n \
           or 训练集 -9 \n \
           or 测试集- 10 \n \
+          or 考虑时间框架训练集 -13 \n \
+          or 考虑时间框架测试集- 14 \n \
           or DEBUG-11 \n\
           or 基于共同好友的好友推荐（aa_n） 12 \n  \
+          or aa-ent 基于熵的好友推荐  - 15\
           "<<endl;
 
     cin>>train_test;
@@ -172,9 +176,11 @@ void main(){
             break;
         }
     case 12:
+    case 15:
         {
-            //pis="";
-            train_testStr="aa_n";
+            //pis="";train_testStr="aa_n / aa_ent";
+            train_testStr="aa_n / aa_ent";
+            //pis="test_";
             /*checkinFileName=INPUTADRESS+pis+FRIENDREC_CHECKINDATE;//CHECKINDATA;//
             friendFileName=INPUTADRESS+pis+FRIENDREC_TESTFRIENDDATE;//FRIENDDATA;//
             caseFileName=INPUTADRESS+pis+FRIENDREC_TESTFRIENDDATE_2;//CHECKTESTDATA;//
@@ -206,6 +212,17 @@ void main(){
             cin>>interval_hour;
             break;
         }
+    case 13:
+        {
+            train_testStr="trainWithWindowTime";
+            checkinFileName=INPUTADRESS+pis+FRIENDREC_CHECKINDATE;
+
+            friendFileName=INPUTADRESS+pis+FRIENDREC_TRAINFRIENDDATE;
+            caseFileName=INPUTADRESS+pis+FRIENDREC_TRAINFRIENDDATE_2;
+            cout<<"请输入LL边的时间间隔（小时）："<<endl;
+            cin>>interval_hour;
+            break;
+        }
     case 10:
         {
             train_testStr="test";
@@ -218,6 +235,19 @@ void main(){
             isTrain=false;
             break;
         }
+    case 14:
+        {
+            train_testStr="testWithWindowTime";
+            checkinFileName=INPUTADRESS+pis+FRIENDREC_CHECKINDATE;
+
+            friendFileName=INPUTADRESS+pis+FRIENDREC_TESTFRIENDDATE;
+            caseFileName=INPUTADRESS+pis+FRIENDREC_TESTFRIENDDATE_2;
+            cout<<"请输入LL边的时间间隔（小时）："<<endl;
+            cin>>interval_hour;
+            isTrain=false;
+            break;
+        }
+
     case 11:
         {
             isDebug=1;
@@ -278,6 +308,18 @@ void main(){
             ss>>outputFileName;
             MetaCpuForFriendRec *metaCpu=new MetaCpuForFriendRec(socialNet,isTrain,true);
             metaCpu->metaCpu(caseFileName,outputFileName,ITEMTYPE_USER);
+            
+            break;
+        }
+    case 13:
+    case 14:
+        {
+            stringstream ss;
+            string outputFileName;
+            ss<<OUTPUTADRESS<<"friendREC_"<<dateSourceStr<<OUTPUTFILE<<"_"<<weightCpuTypeStr<<"_"<<train_testStr<<"_"<<interval_hour<<"hours.txt";
+            ss>>outputFileName;
+            MetaCpuForFriendRec *metaCpu=new MetaCpuForFriendRec(socialNet,isTrain,true);
+            metaCpu->metaCpu(caseFileName,outputFileName,ITEMTYPE_USER,true);
             break;
         }
     case 12:
@@ -285,6 +327,13 @@ void main(){
             FriendRecAAN * frAANRec = new FriendRecAAN(socialNet);
             frAANRec->Recommend(caseFileName);
             break;
+        }
+    case 15:
+        {
+            FriendRecAAENT * frAAENT = new FriendRecAAENT(socialNet);
+            frAAENT->Recommend(caseFileName);
+            break;;
+
         }
     case 4:
         {

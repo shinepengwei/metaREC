@@ -25,6 +25,34 @@ Socialnet *Socialnet::createSocialnet(string chinkinFileName,string friendFileNa
     instanceCount=1;
     return socNet;
 }
+int Socialnet::getWindowTime(int dayOfWeek, int hourOfDay){
+    int rt=-1;//时间框架
+    if (dayOfWeek != 1 && dayOfWeek != 7)
+    {
+        //工作日
+        if (hourOfDay>=23 ||hourOfDay <9)
+        {
+            rt = 0;
+        }else if (hourOfDay>=9 && hourOfDay <18)
+        {
+            rt=2;
+        }else{
+            rt = 3;
+        }
+    }else{
+        //周末
+        if (hourOfDay>=23 ||hourOfDay <9)
+        {
+            rt = 0;
+        }else if (hourOfDay>=9 && hourOfDay <18)
+        {
+            rt=2;
+        }else{
+            rt = 3;
+        }
+    }
+    return rt;
+}
 void Socialnet::readCheckinData(string chinkinFileName){
      //读入签到数据
     ifstream checkinfile(chinkinFileName);
@@ -35,7 +63,9 @@ void Socialnet::readCheckinData(string chinkinFileName){
     cout<<"读取签到文件:"<<chinkinFileName<<endl;
     while(i<4000000){
         i++;
-        if(i%100000==0) cout<<i<<",";
+
+        if (i%100000 == 0) cout<<i<<",";
+
         if(checkinfile.eof()){
             break;
         }
@@ -58,6 +88,7 @@ void Socialnet::readCheckinData(string chinkinFileName){
         CTime ct(tsec);
         int dayOfWeek = ct.GetDayOfWeek();
         int hourOfDay = ct.GetHour();
+        
         if (isDebug) cout<<"时间:"<<t.tm_year<<"年"<<t.tm_mon<<"月"<<t.tm_mday<<"日"<<t.tm_hour<<"时"<<t.tm_min<<"分:"<<tsec<<endl;
         int userid=atoi(result[0].data());
         int locid=atoi(result[4].data());
@@ -66,7 +97,7 @@ void Socialnet::readCheckinData(string chinkinFileName){
         float longitude = atof(result[3].data());
         float latitude = atof(result[2].data());
         //插入签到数据
-        addCheckin(userid,locid,longitude,latitude,tsec);
+        addCheckin(userid,locid,longitude,latitude,getWindowTime(dayOfWeek,hourOfDay));
 
 
         //插入位置-位置边数据
@@ -153,12 +184,12 @@ bool Socialnet::isNeighbor(int fromId,int fromItemType,int toId,int toItemType){
     }
 }
 
-void Socialnet::addCheckin(int userId,int locId, float longitude, float latitude,int checkinTime){
+void Socialnet::addCheckin(int userId,int locId, float longitude, float latitude,int windowTime){
     Item * user=getItemPtrById(userId,ITEMTYPE_USER,ALLOW_INSERT_IF_NULL);
     Item * loc=getItemPtrById(locId,ITEMTYPE_LOCATION,ALLOW_INSERT_IF_NULL,longitude,latitude);
     //网络中插入用户-位置边数据
-    user->addToLocE(locId,weightCpuType,checkinTime);
-    loc->addToUserE(userId,weightCpuType,checkinTime);
+    user->addToLocE(locId,weightCpuType,windowTime);
+    loc->addToUserE(userId,weightCpuType,windowTime);
     if (isDebug)
     {
         cout<<"添加用户-位置边:user-"<<userId<<",loc-"<<locId<<endl;

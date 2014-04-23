@@ -3,79 +3,6 @@
 #对测试集中的用户进行推荐，选择TOP-N的推荐结果，判断是否去过，然后去计算精确率和召回率
 #
 
-'''
-f=open("e:\\data\\output\\gowalla_featuredata_binary_test_2hours.txt",'r')
-weight=[30.2944, 51.8266,981.3731,8.2467,159.4689,20.7453,0.2522]
-
-f=open("e:\\data\\output\\gowalla_featuredata_binary_test_4hours.txt",'r')
-weight=[30.2809, 51.818,981.3944,8.2335,159.4421,20.7149,0.2521]
-
-f=open("e:\\data\\output\\gowalla_featuredata_binary_test_6hours.txt",'r')
-weight=[30.2809, 51.818,981.3944,8.2335,149.4421,20.7149,0.2521]
-'''
-
-'''
-right:
-f=open("e:\\data\\output\\friendREC_gowalla_featuredata_binary_test_4hours.txt",'r')
-weight=[32.3062,162.1386,39.3333,163.7769,70.0707,30.3546,0.6199]
-
-f=open("e:\\data\\output\\friendREC_gowalla_featuredata_log_test_4hours.txt",'r')
-weight=[55.2417,129.1402,55.3706,63.8615,2.8359,8.2175,0.5667]
-'''
-
-#foursquare-newYrok 位置推荐
-'''
-f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_normal_test_4hours.txt",'r')
-weight=[20.7812,37.0776,519.0136,145.5352,29.0935,78.6069,0.1254]
-
-f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_log_test_4hours_new.txt",'r')
-weight=[0.7979,1.8155,133.7793,30.6517,92.3578,27.5262,0.0842]
-
-f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_4hours.txt",'r')
-weight=[ 46.9529,114.0446,1021.8946,230.0309,304.527,108.9359,0.1586]
-
-#no - ll
-f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_4hours.txt",'r')
-weight=[ 49.8306,125.5997,898.876,0,0,0,0.1594] 
-#no - ll
-f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_4hours.txt",'r')
-weight=[ 115.5997,0.7979,698.876,0,0,0,0.1594]
-
-'''
-
-#Foursquare-ALL 
-'''
-f=open("E:\\checkin\\result\\foursquare_all_featuredata_normal_test_4hours.txt",'r')
-weight=[ 33.9048,56.3842,592.2153,48.5725,349.328,20.3929, 0.1512]
-f=open("E:\\checkin\\result\\foursquare_all_featuredata_binary_test_4hours.txt",'r')
-weight=[ 63.2306,112.764,1060.1232,68.3359,276.8421,46.9454, 0.2135]
-f=open("E:\\checkin\\result\\foursquare_all_featuredata_log_test_4hours.txt",'r')
-weight=[ 1.8949,1.4017,322.5896,22.9564,72.0895,9.9466, 0.0957]
-no-ll
-f=open("E:\\checkin\\result\\foursquare_all_featuredata_binary_test_4hours.txt",'r')
-weight=[ 47.1213,142.4506,423.2357,0,0,0, 0.2062]
-
-
-'''
-#Gowalla
-'''
-f=open("E:\\checkin\\result\\gowalla_featuredata_binary_test_4hours.txt",'r')
-weight=[  8.8539,25.8855,487.6918,2.0132,167.649,28.1172, 0.3214]
-f=open("E:\\checkin\\result\\gowalla_featuredata_log_test_4hours.txt",'r')
-weight=[  3.9347,16.2318,132.7977,20.4024,30.5372,6.9817, 0.1159]
-f=open("E:\\checkin\\result\\gowalla_featuredata_normal_test_4hours.txt",'r')
-weight=[ 1.496,
-         9.0263,
-         275.2982,
-         4.5761,
-         215.8752,
-         7.9142,
-          0.2393]
-no-ll
-f=open("E:\\checkin\\result\\gowalla_featuredata_binary_test_4hours.txt",'r')
-weight=[ 12.8056,407.5661,143.2343,0,0,0,0.1044]
-'''
-
 ##friend rec
 ##Gowalla
 '''
@@ -85,9 +12,16 @@ f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_log_test_4hours.txt",
 weight=[ 51.936,151.8108,46.5162,67.8026,2.2243,51.475,0.4483]
 f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_binary_test_4hours.txt",'r')
 weight=[ 35.5874,115.5123,61.8356,223.2695,66.2465,124.2166,0.4876]
+
+'''
+##Foursquare-ALL
 '''
 f=open("E:\\checkin\\result\\friendREC_foursquare_all_featuredata_binary_test_4hours_out.txt",'r')
 weight=[ 48.2359,389.6398,13.8099,93.8378,0.8922,13.0806, 0.5015]
+'''
+
+f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_binary_test_4hours.txt",'r')
+weight=[ 35.5874,115.5123,61.8356,223.2695,66.2465,124.2166,0.4876]
 
 
 
@@ -199,21 +133,15 @@ while True:
             t20=-1
 
             
-            if user_postiveCount >= 5 :
+            if user_postiveCount >= 10 :
                 t5=calPostiveCountAtN(resultlist,5)
                 alltop[0]=alltop[0]+t5
                 alluserCount[0] = alluserCount[0] + 1
                 allPosCount[0]=allPosCount[0]+user_postiveCount
-                
-            if user_postiveCount >= 10 : 
                 t10=calPostiveCountAtN(resultlist,10)
                 alluserCount[1] = alluserCount[1] + 1
                 alltop[1]=alltop[1]+t10
                 allPosCount[1]=allPosCount[1]+user_postiveCount
-
-                
-
-            if user_postiveCount >= 20 : 
                 t20=calPostiveCountAtN(resultlist,20)
                 alluserCount[2] = alluserCount[2] + 1
                 alltop[2]=alltop[2]+t20

@@ -6,8 +6,6 @@ class FriBasedRecommend :
 {
 public:
     FriBasedRecommend(Socialnet* socNet);
-   
-
 
     void Recommend(string checkinDataFileName);
     ~FriBasedRecommend(void);

@@ -1,5 +1,6 @@
 #pragma once
 #include "base.h"
+
 class Item
 {
 public:
@@ -21,12 +22,12 @@ public:
     float getLatitude();
 
 
-    void addToLocE(int id,int weightCPUType,int time=0);
-    void addToUserE(int id,int weightCUPType,int time=0);
+    void addToLocE(int id,int weightCPUType,int windowTime=-1);
+    void addToUserE(int id,int weightCUPType,int windowTime=-1);
 
 
     //获取某一类边的权值之和
-    float getAllWeight(int type);
+    float getAllWeight(int type,int windowTime=-1);
     int getId();
     int getType();
 
@@ -35,16 +36,18 @@ public:
 
 
 private:
-    void addEdge(int id,int weightCPUType,int time,int type);
+    void addEdge(int id,int weightCPUType,int windowTime,int type);
 protected:
     int id;
     int toUserAllWei;//同上
+    int toUserAllWeiInWinTime[WINDOWTIME_COUNT];
     int type;//ITEMTYPE_USER or ITEMTYPE_LOCATION
     EdgeMap toLocE;//locationId,*Edge
     EdgeMap toUserE;//userId,*Edge
     float longitude;//经度
     float latitude;//维度
     int toLocAllWei;//指向位置节点的所有的边的权重和,默认值为-1.-1时重新计算，如果不是-1说明已经计算完毕
+    int toLocAllWeiInWinTime[WINDOWTIME_COUNT];
 };
 
 

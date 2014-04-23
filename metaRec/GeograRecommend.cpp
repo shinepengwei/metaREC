@@ -56,7 +56,7 @@ void GeograRecommend::CalRecResultForGEO(map<int,float>&recResult,int uid){
     for(ItemMap::const_iterator locIter=locList->begin();locIter!=locList->end();++locIter){
         //对于所有的位置，根据用户访问过的位置计算它和用户关联性
 
-        //if(userLocList->find(locIter->first)!=userLocList->end()) continue;//如果用户i曾经访问过该位置，不推荐该位置
+        if(userLocList->find(locIter->first)!=userLocList->end()) continue;//如果用户i曾经访问过该位置，不推荐该位置
         //cout<<"该Location已经计算过了
         if(recResult.find(locIter->first)!=recResult.end())  continue;
 
@@ -90,8 +90,10 @@ void GeograRecommend::Recommend(string checkinDataFileName, bool isUSG){
     set<int> locIdSet;//测试集中当前用户已访问过的用户，用于消除测试集中用户多次访问某一位置
     int rightRec[3]={0};//推荐正确的数量
     int allRec[3]={0};//推荐的所有的元素数量
-    int rightCase=0;//应该被推荐的数量
+    int rightCase[3]={0};//应该被推荐的数量
 
+    int rightRecOfUser[3] = {0};
+    int rightCaseOfUser=0;
     while(true){
         i++;
         //读一行签到记录并解析
@@ -118,6 +120,28 @@ void GeograRecommend::Recommend(string checkinDataFileName, bool isUSG){
 
         if(userid!=lastUserId){//针对于一个新的用户，为其推荐TOP-K的地点
             //先把上一个user的信息打印出来
+
+            if (rightCaseOfUser>=5)
+            {
+                rightRec[0]+=rightRecOfUser[0];
+                rightCase[0] += rightCaseOfUser;
+                allRec[0]+=TOPN1;
+                
+            }
+            if (rightCaseOfUser>=10)
+            {
+                rightRec[1]+=rightRecOfUser[1];
+                rightCase[1] += rightCaseOfUser;
+                allRec[1]+=TOPN2;
+                
+            }
+            if (rightCaseOfUser>=20)
+            {
+                rightRec[2]+=rightRecOfUser[2];
+                rightCase[2] += rightCaseOfUser;
+                allRec[2]+=TOPN3;
+            }
+
             if(allRec[0]!=0){
                 if(ISDEBUG){
                     cout<<"top-5:"<<endl;
@@ -125,19 +149,19 @@ void GeograRecommend::Recommend(string checkinDataFileName, bool isUSG){
                 }
                 cout<<"GEOGra"<<checkinDataFileName<<endl;
                 cout<<" GEOGra精确率rightRec[0]/allRec[0]："<<rightRec[0]<<"/"<<allRec[0]<<" :"<<(float)rightRec[0]/allRec[0]<<endl;
-                cout<<"召回率rightRec[0]/rightCase："<<rightRec<<"/"<<rightCase<<" :"<<(float)rightRec[0]/rightCase<<endl;
+                cout<<"召回率rightRec[0]/rightCase[0]："<<rightRec<<"/"<<rightCase[0]<<" :"<<(float)rightRec[0]/rightCase[0]<<endl;
                 if(ISDEBUG){
                     cout<<"top-10:"<<endl;
                     printMap(sortedRec2);
                 }
                 cout<<" 精确率rightRec[1]/allRec[1]："<<rightRec[1]<<"/"<<allRec[1]<<" :"<<(float)rightRec[1]/allRec[1]<<endl;
-                cout<<"召回率rightRec[1]/rightCase："<<rightRec[1]<<"/"<<rightCase<<" :"<<(float)rightRec[1]/rightCase<<endl;
+                cout<<"召回率rightRec[1]/rightCase[1]："<<rightRec[1]<<"/"<<rightCase[1]<<" :"<<(float)rightRec[1]/rightCase[1]<<endl;
                 if(ISDEBUG){
                     cout<<"top-20:"<<endl;
                     printMap(sortedRec3);
                 }
                 cout<<" 精确率rightRec[2]/allRec[2]："<<rightRec[2]<<"/"<<allRec[2]<<" :"<<(float)rightRec[2]/allRec[2]<<endl;
-                cout<<"召回率rightRec[1]/rightCase："<<rightRec[2]<<"/"<<rightCase<<" :"<<(float)rightRec[2]/rightCase<<endl;
+                cout<<"召回率rightRec[1]/rightCase[2]："<<rightRec[2]<<"/"<<rightCase[2]<<" :"<<(float)rightRec[2]/rightCase[2]<<endl;
             }
             //计算这个新的user的推荐信息
             //首先清除一些东西
@@ -149,6 +173,11 @@ void GeograRecommend::Recommend(string checkinDataFileName, bool isUSG){
             sortedRec2.clear();
             sortedRec3.clear();
             locIdSet.clear();
+            for (int i=0;i<3;i++)
+            {
+                rightRecOfUser[i]=0;
+            }
+            rightCaseOfUser=0;
 
             //计算用户对未评价的ITEM的隐含评价，以此作为推荐结果
             if (isUSG)
@@ -185,35 +214,31 @@ void GeograRecommend::Recommend(string checkinDataFileName, bool isUSG){
             sortRecResult(sortedRec2,recResultG,TOPN2);
             sortRecResult(sortedRec3,recResultG,TOPN3);
             //cout<<"排序厚的推荐结果：（位置ID，推荐度）"<<userid<<endl;
-            allRec[0]+=TOPN1;
-            allRec[1]+=TOPN2;
-            allRec[2]+=TOPN3;
             lastUserId=userid;
         }
         //计算精确率和召回率
         //第一步统计推荐正确的数量
         if(sortedRec1.find(locid)!=sortedRec1.end()){
-
             if(sortedRec1[locid]!=-1){
-                rightRec[0]++;
+                rightRecOfUser[0]++;
                 sortedRec1[locid]=-1;
             }
         }
         if(sortedRec2.find(locid)!=sortedRec2.end()){
             if(sortedRec2[locid]!=-1){
-                rightRec[1]++;
+                rightRecOfUser[1]++;
                 sortedRec2[locid]=-1;
             }
         }
         if(sortedRec3.find(locid)!=sortedRec3.end()){
             if(sortedRec3[locid]!=-1){
-                rightRec[2]++;
+                rightRecOfUser[2]++;
                 sortedRec3[locid]=-1;
             }
         }
 
         if(locIdSet.find(locid)==locIdSet.end()){
-            rightCase++;
+            rightCaseOfUser++;
             locIdSet.insert(locid);
         }
     }
@@ -222,13 +247,13 @@ void GeograRecommend::Recommend(string checkinDataFileName, bool isUSG){
     cout<<"完成："<<endl;
     cout<<"GEOGra top-5:"<<endl;
     cout<<" 精确率："<<(float)rightRec[0]/allRec[0]<<endl;
-    cout<<"召回率"<<(float)rightRec[0]/rightCase<<endl;
+    cout<<"召回率"<<(float)rightRec[0]/rightCase[0]<<endl;
     cout<<"top-10:"<<endl;
     cout<<" 精确率："<<(float)rightRec[1]/allRec[1]<<endl;
-    cout<<"召回率"<<(float)rightRec[1]/rightCase<<endl;
+    cout<<"召回率"<<(float)rightRec[1]/rightCase[1]<<endl;
     cout<<"top-20:"<<endl;
     cout<<" 精确率："<<(float)rightRec[2]/allRec[2]<<endl;
-    cout<<"召回率"<<(float)rightRec[2]/rightCase<<endl;
+    cout<<"召回率"<<(float)rightRec[2]/rightCase[2]<<endl;
 }
 
 GeograRecommend::~GeograRecommend(void)

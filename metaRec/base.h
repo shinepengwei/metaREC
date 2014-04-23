@@ -27,6 +27,9 @@
 #define OUTPUT_NEG_NOT_EQUAL 0
 
 
+#define WINDOWTIME_COUNT 6
+
+
 
 using namespace std;
 class Edge;

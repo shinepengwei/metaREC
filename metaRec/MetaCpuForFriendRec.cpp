@@ -11,7 +11,7 @@ MetaCpuForFriendRec::MetaCpuForFriendRec(Socialnet *socialNet,bool outputNegEqua
 }
 
 //读取下一阶段的数据，计算元路径特征值，并且生成正负例并将其保存在文件中。
-void MetaCpuForFriendRec::metaCpu(string testDateFileName,string outputFileName,int toItemType){
+void MetaCpuForFriendRec::metaCpu(string testDateFileName,string outputFileName,int toItemType,bool useWindowTime){
     FeatureMap metaFeature[6];
     int route0[3]={ITEMTYPE_USER,ITEMTYPE_USER,ITEMTYPE_USER};//UUU
     int route1[4]={ITEMTYPE_USER,ITEMTYPE_USER,ITEMTYPE_USER,ITEMTYPE_USER};//UUUU
@@ -99,12 +99,39 @@ void MetaCpuForFriendRec::metaCpu(string testDateFileName,string outputFileName,
             }
 
             //出现一个新的userid，找到这个用户通过元路径到达的所有位置，并计算出用户-位置的元路径特征值
-            metaFeature[0]=calFeature(userid,route0,2);
-            metaFeature[1]=calFeature(userid,route1,3);
-            metaFeature[2]=calFeature(userid,route2,3);
-            metaFeature[3]=calFeature(userid,route3,2);
-            metaFeature[4]=calFeature(userid,route4,3);
-            metaFeature[5]=calFeature(userid,route5,3);
+            if (!useWindowTime)
+            {
+                metaFeature[0]=calFeature(userid,route0,2);
+                metaFeature[1]=calFeature(userid,route1,3);
+                metaFeature[2]=calFeature(userid,route2,3);
+                metaFeature[3]=calFeature(userid,route3,2);
+                metaFeature[4]=calFeature(userid,route4,3);
+                metaFeature[5]=calFeature(userid,route5,3);
+            }else{
+                FeatureMap t_metaFeature[6];
+                for (int wt=0;wt<WINDOWTIME_COUNT; wt++)
+                {
+                    t_metaFeature[0]=calFeature(userid,route0,2);
+                    t_metaFeature[1]=calFeature(userid,route1,3);
+                    t_metaFeature[2]=calFeature(userid,route2,3);
+                    t_metaFeature[3]=calFeature(userid,route3,2);
+                    t_metaFeature[4]=calFeature(userid,route4,3);
+                    t_metaFeature[5]=calFeature(userid,route5,3);
+                    for (int j=0;j<6;j++)
+                    {
+                        for (FeatureMap::const_iterator fmIter = t_metaFeature[j].begin();fmIter!=t_metaFeature[j].end(); ++fmIter)
+                        {
+                            if (metaFeature[j].find(fmIter->first) != metaFeature->end())
+                            {
+                                metaFeature[j][fmIter->first] +=fmIter->second;
+                            }else{
+                                metaFeature[j].insert(FeatureMap::value_type(fmIter->first,fmIter->second));
+                            }
+                        }
+                    }
+                }
+            }
+            
             if (isDebug) printFeatureMap(metaFeature);
             lastuserid=userid;
             lastPosCount=0;
@@ -122,6 +149,8 @@ void MetaCpuForFriendRec::metaCpu(string testDateFileName,string outputFileName,
         {
             if (isDebug) cout<<"这一阶段（生成正负例）已经访问过该位置"<<endl;
             testReCount++;
+
+
         }else if (reFlag==-3)
         {
             if (isDebug) cout<<"该位置不属于任何元路径"<<endl;
@@ -224,7 +253,7 @@ int MetaCpuForFriendRec::addAPositiveCase(
 }
 
 //计算基于route元路径从id为fromId的ITEM到其他item（所有元路径可以到达的ITEM）的特征值MAP
-FeatureMap MetaCpuForFriendRec::calFeature(int fromId,const int *route,int length){
+FeatureMap MetaCpuForFriendRec::calFeature(int fromId,const int *route,int length,int windowTime){
     FeatureMap result;
     Item *item1=socialNet->getItemPtrById(fromId,route[0]);
     if(item1==NULL) return result;
@@ -236,13 +265,13 @@ FeatureMap MetaCpuForFriendRec::calFeature(int fromId,const int *route,int lengt
     }
 
     EdgeMap *edgelist1=item1->getToItemE(route[1]);
-    float allweight1=item1->getAllWeight(route[1]);
+    float allweight1=item1->getAllWeight(route[1],windowTime);
 
     for(EdgeMap::const_iterator iter1=edgelist1->begin();iter1!=edgelist1->end();++iter1){
         int id2=iter1->first;
         float weight1;
         if(iter1->second!=NULL){
-            weight1=iter1->second->getWeight();
+            weight1=iter1->second->getWeight(windowTime);
             if (weight1==0) continue;
         }
         float feat1=weight1/allweight1;
@@ -259,12 +288,12 @@ FeatureMap MetaCpuForFriendRec::calFeature(int fromId,const int *route,int lengt
         }
 
         EdgeMap *edgelist2=item2->getToItemE(route[2]);
-        float allweight2=item2->getAllWeight(route[2]);
+        float allweight2=item2->getAllWeight(route[2],windowTime);
         for(EdgeMap::const_iterator iter2=edgelist2->begin();iter2!=edgelist2->end();++iter2){
             int id3=iter2->first;
             float weight2;
             if(iter2->second!=NULL){
-                weight2=iter2->second->getWeight();
+                weight2=iter2->second->getWeight(windowTime);
                 if (weight2==0) continue;
             }
             float feat2=weight2/allweight2;
@@ -295,13 +324,13 @@ FeatureMap MetaCpuForFriendRec::calFeature(int fromId,const int *route,int lengt
                 }
                 if (isDebug) {cout<<kongbai<<kongbai<<"第三个节点："<<endl;item3->print(route[1],2);}
                 EdgeMap *edgelist3=item3->getToItemE(route[3]);
-                float allweight3=item3->getAllWeight(route[3]);
+                float allweight3=item3->getAllWeight(route[3],windowTime);
 
                 for(EdgeMap::const_iterator iter3=edgelist3->begin();iter3!=edgelist3->end();++iter3){
                     int id4=iter3->first;
                     float weight3=1;
                     if(iter3->second!=NULL){
-                        weight3=iter3->second->getWeight();
+                        weight3=iter3->second->getWeight(windowTime);
                         if (weight3==0) continue;
                     }
                     float feat3=weight3/allweight3;
@@ -416,3 +445,113 @@ void MetaCpuForFriendRec::printFeatureMap(const FeatureMap *fm) const{
     }
     cout<<"****特征值集合输出结束****"<<endl;
 }
+
+/*
+//计算基于route元路径从id为fromId的ITEM到其他item（所有元路径可以到达的ITEM）的特征值MAP
+FeatureMap MetaCpuForFriendRec::calFeature(int fromId,const int *route,int length){
+    FeatureMap result;
+    Item *item1=socialNet->getItemPtrById(fromId,route[0]);
+    if(item1==NULL) return result;
+
+    string kongbai="    ";
+    if (isDebug)  {
+        cout<<"开始计算一个Item的一个元路径特征***************"<<endl;
+        cout<<"计算初始节点为ID的item到其他Item的特征值"<<endl<<"初始节点："<<endl;item1->print(route[0]);
+    }
+
+    EdgeMap *edgelist1=item1->getToItemE(route[1]);
+    float allweight1=item1->getAllWeight(route[1]);
+
+    for(EdgeMap::const_iterator iter1=edgelist1->begin();iter1!=edgelist1->end();++iter1){
+        int id2=iter1->first;
+        float weight1;
+        if(iter1->second!=NULL){
+            weight1=iter1->second->getWeight();
+            if (weight1==0) continue;
+        }
+        float feat1=weight1/allweight1;
+        
+        Item * item2=socialNet->getItemPtrById(id2,route[1]);
+        if (item2==NULL) continue;
+
+        if (isDebug)
+        {
+            cout<<kongbai<<"初始节点到第二个节点："<<weight1<<"/"<<allweight1<<"="<<feat1<<endl;
+            cout<<kongbai<<"第二个节点："<<endl;
+            item2->print(route[1],1);
+
+        }
+
+        EdgeMap *edgelist2=item2->getToItemE(route[2]);
+        float allweight2=item2->getAllWeight(route[2]);
+        for(EdgeMap::const_iterator iter2=edgelist2->begin();iter2!=edgelist2->end();++iter2){
+            int id3=iter2->first;
+            float weight2;
+            if(iter2->second!=NULL){
+                weight2=iter2->second->getWeight();
+                if (weight2==0) continue;
+            }
+            float feat2=weight2/allweight2;
+            if (isDebug) cout<<kongbai<<kongbai<<"第二节点到第三个节点："<<weight2<<"/"<<allweight2<<"="<<feat2<<endl;
+            if(length==2){
+                if(fromId != id3 && !socialNet->isNeighbor(fromId,route[0],id3,route[2])){
+                    //这个节点和原节点没有连接，计算他们之间的元路径特征值
+                    float feature=feat1*feat2;
+                    FeatureMap::iterator fiter=result.find(id3);
+                    if(fiter==result.end()){
+                        if (isDebug) cout<<kongbai<<kongbai<<"**生成一个新的特征值:"<<id3<<"-"<<feature<<endl;
+                        result.insert(FeatureMap::value_type(id3,feature));
+                    }
+                    else{
+                        if (isDebug) cout<<kongbai<<kongbai<<"**更新特征值（存在其他路径可达）:"<<id3<<"-"<<feature<<"+"<<fiter->second<<"="<<feature+fiter->second<<endl;
+                        fiter->second=feature+fiter->second;
+                    }
+                }else{
+                    if (isDebug) cout<<kongbai<<kongbai<<"**两个节点已存在边 或者 节点相同"<<endl;
+                }
+            }else{
+                Item * item3=socialNet->getItemPtrById(id3,route[2]);
+                if(item3==NULL) continue;
+                if (item3->getId()==fromId&&item3->getType()==route[0])
+                {
+                    if (isDebug) {cout<<kongbai<<kongbai<<"第三个节点和第一个节点重复，忽略"<<endl;}
+                    continue;
+                }
+                if (isDebug) {cout<<kongbai<<kongbai<<"第三个节点："<<endl;item3->print(route[1],2);}
+                EdgeMap *edgelist3=item3->getToItemE(route[3]);
+                float allweight3=item3->getAllWeight(route[3]);
+
+                for(EdgeMap::const_iterator iter3=edgelist3->begin();iter3!=edgelist3->end();++iter3){
+                    int id4=iter3->first;
+                    float weight3=1;
+                    if(iter3->second!=NULL){
+                        weight3=iter3->second->getWeight();
+                        if (weight3==0) continue;
+                    }
+                    float feat3=weight3/allweight3;
+                    if (isDebug) cout<<kongbai<<kongbai<<kongbai<<"第三节点到第四个节点："<<weight3<<"/"<<allweight3<<"="<<feat3<<endl;
+                    if(fromId != id4 && !socialNet->isNeighbor(fromId,route[0],id4,route[3])){
+                        float feature=feat1*feat2*feat3;
+                        FeatureMap::iterator fiter=result.find(id4);
+                        if(fiter==result.end()){
+                            if (isDebug) cout<<kongbai<<kongbai<<kongbai<<"**生成一个新的特征值:"<<id4<<"-"<<feature<<endl;
+                            result.insert(FeatureMap::value_type(id4,feature));
+                        }
+                        else{
+                            if (isDebug) cout<<kongbai<<kongbai<<kongbai<<"**更新特征值（存在其他路径可达）:"<<id4<<"-"<<feature+fiter->second<<endl;
+                            fiter->second=feature+fiter->second;
+                        }
+                    }else{
+                        if (isDebug) cout<<kongbai<<kongbai<<kongbai<<"**两个节点以存在边 或者 节点相同"<<endl;
+                    }
+                }
+            }
+        }
+    }
+    if (isDebug)
+    {
+        cout<<"计算该Item的该元路径特征值结束*************"<<endl;
+    }
+    return result;
+}
+*/

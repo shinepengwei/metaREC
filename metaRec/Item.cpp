@@ -8,6 +8,11 @@ Item::Item(int itemid)
     this->id=itemid;
     this->toLocAllWei=-1;//表示未初始化，在第一次获取即调用getAllWei()时计算
     this->toUserAllWei=-1;
+    for (int i=0;i<WINDOWTIME_COUNT;i++)
+    {
+        toLocAllWeiInWinTime[i] = -1;
+        toUserAllWeiInWinTime[i] = -1;
+    }
     this->latitude = -1;
     this->longitude = -1;
 }
@@ -15,6 +20,11 @@ Item::Item(int itemid,int itemType){
     this->id=itemid;
     this->toLocAllWei=-1;//表示未初始化，在第一次获取即调用getAllWei()时计算
     this->toUserAllWei=-1;
+    for (int i=0;i<WINDOWTIME_COUNT;i++)
+    {
+        toLocAllWeiInWinTime[i] = -1;
+        toUserAllWeiInWinTime[i] = -1;
+    }
     this->type=itemType;
     this->latitude = -1;
     this->longitude = -1;
@@ -72,42 +82,77 @@ EdgeMap * Item::getToItemE(int type){
 }
 
 
-float Item::getAllWeight(int type){
+float Item::getAllWeight(int type, int windowTime){
     if(type==ITEMTYPE_LOCATION){
-        if(this->toLocAllWei==-1){
-            float allwei=0;
-            for(EdgeMap::const_iterator iter=this->toLocE.begin();iter!=toLocE.end();++iter){
-                allwei+=iter->second->getWeight();
+        if (windowTime == -1)
+        {
+            if(this->toLocAllWei==-1){
+                float allwei=0;
+                for(EdgeMap::const_iterator iter=this->toLocE.begin();iter!=toLocE.end();++iter){
+                    allwei+=iter->second->getWeight();
+                }
+                if (allwei!=0)
+                {
+                    toLocAllWei=allwei;
+                }else
+                    toLocAllWei=1;
+                return toLocAllWei;
             }
-            if (allwei!=0)
-            {
-                toLocAllWei=allwei;
-            }else
-                toLocAllWei=1;
-            return toLocAllWei;
+            return this->toLocAllWei;
+        }else{
+            if(this->toLocAllWeiInWinTime[windowTime]==-1){
+                float allwei=0;
+                for(EdgeMap::const_iterator iter=this->toLocE.begin();iter!=toLocE.end();++iter){
+                    allwei+=iter->second->getWeight(windowTime);
+                }
+                if (allwei!=0)
+                {
+                    toLocAllWeiInWinTime[windowTime]=allwei;
+                }else
+                    toLocAllWeiInWinTime[windowTime]=0;//为了做分母
+                return toLocAllWeiInWinTime[windowTime];
+            }
+            return toLocAllWeiInWinTime[windowTime];
         }
-        return this->toLocAllWei;
+        
     }else if(type==ITEMTYPE_USER){
-        if(toUserAllWei==-1){
-            float allwei=0;
-            for(EdgeMap::const_iterator iter=this->toUserE.begin();iter!=toUserE.end();++iter){
-                allwei+=iter->second->getWeight();
+        if (windowTime == -1)
+        {
+            if(toUserAllWei==-1){
+                float allwei=0;
+                for(EdgeMap::const_iterator iter=this->toUserE.begin();iter!=toUserE.end();++iter){
+                    allwei+=iter->second->getWeight();
+                }
+                if (allwei!=0)
+                {
+                    toUserAllWei=allwei;
+                }else
+                    toUserAllWei=1;
+                return toUserAllWei;
             }
-            if (allwei!=0)
-            {
-                toUserAllWei=allwei;
-            }else
-                toUserAllWei=1;
-            return toUserAllWei;
+            return this->toUserAllWei;
+        }else{
+            if(toUserAllWeiInWinTime[windowTime]==-1){
+                float allwei=0;
+                for(EdgeMap::const_iterator iter=this->toUserE.begin();iter!=toUserE.end();++iter){
+                    allwei+=iter->second->getWeight(windowTime);
+                }
+                if (allwei!=0)
+                {
+                    toUserAllWeiInWinTime[windowTime]=allwei;
+                }else
+                    toUserAllWeiInWinTime[windowTime]=0;
+                return toUserAllWeiInWinTime[windowTime];
+            }
+            return this->toUserAllWeiInWinTime[windowTime];
         }
-        return this->toUserAllWei;
     }else{
         return -2;
     }
 }
 
 
-void Item::addEdge(int id,int weightCPUType,int time,int type){
+void Item::addEdge(int id,int weightCPUType,int windowTime,int type){
     EdgeMap * edgeMap;
     if(type==ITEMTYPE_USER){
         edgeMap=&toUserE;
@@ -117,9 +162,9 @@ void Item::addEdge(int id,int weightCPUType,int time,int type){
     EdgeMap::iterator iter=edgeMap->find(id);
     if(iter!=edgeMap->end())
     {//已经有了一条边，增加权值和时间set即可
-        iter->second->addEdge(time);
+        iter->second->addEdge(windowTime);
     }else{
-        Edge * newedge=new Edge(weightCPUType);
+        Edge * newedge=new Edge(weightCPUType,windowTime);
         edgeMap->insert(EdgeMap::value_type(id,newedge));
     }
 }

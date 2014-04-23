@@ -9,7 +9,7 @@ class MetaCpuForFriendRec
 {
 public:
     //读取下一阶段的数据，计算元路径特征值，并且生成正负例并将其保存在文件中。
-    void metaCpu(string testDateFileName,string outputFileName,int toItemType);
+    void metaCpu(string testDateFileName,string outputFileName,int toItemType,bool useWindowTime=false);
     MetaCpuForFriendRec(Socialnet *socialNet,bool outputNegEqualPos,bool outputFileWrite);
 private:
     Socialnet *socialNet;
@@ -27,7 +27,8 @@ private:
     //计算基于route元路径从id为fromId的ITEM到其他item（所有元路径可以到达的ITEM）的特征值MAP
     FeatureMap calFeature(int fromId,//起始item的ID，返回的特征集为这个item和其他item直接的特征值
         const int *route,//元路径特征
-        int length
+        int length,
+        int  windowTime = -1
         );//描述这个元路径的长度
 
 
