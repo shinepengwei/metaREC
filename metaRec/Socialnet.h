@@ -20,12 +20,16 @@ public:
     ~Socialnet(void);
     Item * getItemPtrById(int id,int itemType,bool isAllowNewType=false, float longitude = -1, float latitude = -1);
     bool isNeighbor(int fromId,int fromItemType,int toId,int toItemType);
+
+    void calculateUserDensity();
+    void calculateUserLocDensity();
+
     static Socialnet * createSocialnet(string chinkinFileName,string friendFileName,
         int weightCpuType=WEIGHTCPUTYPE_NORMAL,
         bool hasLLRelation=true,
         int time_iterval=24
         ) ;
-    //TODO
+    
    
     bool const hasLLRelation;
     //根据经纬度返回亮点的距离。

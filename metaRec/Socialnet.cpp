@@ -2,13 +2,39 @@
 #include<fstream>
 #include <iostream>
 #include<ctime>
+#include "Item.h"
 #include "atltime.h"
 extern int isDebug;
 
 //处理文件用到的字符串分割函数,定义在tool.cpp
 vector<std::string> split(string str);
 int Socialnet::instanceCount=0;
-
+void Socialnet::calculateUserDensity(){
+    int userCount = this->userList.size();
+    int relationCount =0;
+    for (ItemMap::const_iterator userIter=userList.begin();userIter != userList.end();userIter++)
+    {
+        Item * user = userIter->second;
+        relationCount +=user->getAllWeight(ITEMTYPE_USER);
+    }
+    cout<<"用户节点数量："<<userCount<<endl;
+    cout<<"好友关系数量"<<relationCount/2<<endl;
+    cout<<"用户好友网络的网络密度为："<<(double)relationCount/(2*userCount*userCount)<<endl;
+}
+void Socialnet::calculateUserLocDensity(){
+    int userCount = this->userList.size();
+    int locCount = this->locList.size();
+    int relationCount =0;
+    for (ItemMap::const_iterator userIter=userList.begin();userIter != userList.end();userIter++)
+    {
+        Item * user = userIter->second;
+        relationCount +=user->getAllWeight(ITEMTYPE_LOCATION);
+    }
+    cout<<"用户节点数量："<<userCount<<endl;
+    cout<<"位置节点数量："<<locCount<<endl;
+    cout<<"签到（不重复）数量"<<relationCount/2<<endl;
+    cout<<"签到网络的网络密度为："<<(double)relationCount/(2*userCount*locCount)<<endl;
+}
 Socialnet::Socialnet(int weightCpuType,bool hasLLRelation):hasLLRelation(hasLLRelation)
 {
     this->weightCpuType=weightCpuType;   
@@ -61,7 +87,7 @@ void Socialnet::readCheckinData(string chinkinFileName){
     int lastUserId=0,lastLocId=0,lastTimeSec=0;//用于判断比较获得位置-位置边
     //根据用户的签到信息，读用户、位置节点信息以及用户-位置和位置-位置的边信息
     cout<<"读取签到文件:"<<chinkinFileName<<endl;
-    while(i<4000000){
+    while(true){
         i++;
 
         if (i%100000 == 0) cout<<i<<",";
@@ -73,6 +99,8 @@ void Socialnet::readCheckinData(string chinkinFileName){
         string str(buffer);
         if (isDebug) cout<<"读取一条记录:"<<endl<<str<<endl;
         vector<std::string> result=split(str);
+        if(result.size()!=5)
+            break;
         //一行字符串分割后转意
         struct tm t; 
         t.tm_year=atoi(result[1].substr(0,4).data())-1900;

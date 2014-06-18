@@ -2,26 +2,53 @@
 #useful！！！！！
 #对测试集中的用户进行推荐，选择TOP-N的推荐结果，判断是否去过，然后去计算精确率和召回率
 #
-
-##friend rec
-##Gowalla
 '''
-f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_normal_test_4hours.txt",'r')
-weight=[ 34.312,115.9688,92.7004,229.5602,25.1598,81.9283, 0.4778]
+
 f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_log_test_4hours.txt",'r')
 weight=[ 51.936,151.8108,46.5162,67.8026,2.2243,51.475,0.4483]
 f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_binary_test_4hours.txt",'r')
 weight=[ 35.5874,115.5123,61.8356,223.2695,66.2465,124.2166,0.4876]
 
+f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_binary_test_4hours.txt",'r')
+weight=[ 35.5874,115.5123,61.8356,223.2695,66.2465,124.2166,0.4876]
+
+f=open("E:\\checkin\\result\\friendREC_foursquare_NewYork_featuredata_binary_test_4hours.txt",'r')
+weight=[ 15.9454,368.887,328.8833,924.1459,327.2421,397.884,0.4582]
+
+'''
+
+
+
+##friend rec
+##Gowalla
+'''
+
+f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_binary_testWithWindowTime_4hours.txt",'r')
+weight=[ 35.5874,115.5123,61.8356,223.2695,66.2465,124.2166,0.4876]
+
+
 '''
 ##Foursquare-ALL
 '''
 f=open("E:\\checkin\\result\\friendREC_foursquare_all_featuredata_binary_test_4hours_out.txt",'r')
+weight=[ 53.7691,417.3281,16.7887,165.7869,5.7623,112.4474,0.5057]
+f=open("E:\\checkin\\result\\friendREC_foursquare_all_featuredata_binary_testWithWindowTime_4hours.txt",'r')
+weight=[ 52.039,371.4873,15.7453,242.3985,9.2692,134.9424,0.4764]
+
+'''
+##Foursquare - newyork
+'''
+
+
+f=open("E:\\checkin\\result\\friendREC_foursquare_NewYork_featuredata_binary_testWithWindowTime_4hours.txt",'r')
 weight=[ 48.2359,389.6398,13.8099,93.8378,0.8922,13.0806, 0.5015]
+
+f=open("E:\\checkin\\result\\friendREC_foursquare_NewYork_featuredata_binary_test_4hours.txt",'r')
+weight=[ 47.3984,554.3011,11.0671,165.2897,3.6112,108.1687,0.5624]
 '''
 
 f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_binary_test_4hours.txt",'r')
-weight=[ 35.5874,115.5123,61.8356,223.2695,66.2465,124.2166,0.4876]
+weight=[ 34.312,115.9688,92.7004,229.5602,25.1598,81.9283, 0.4778]
 
 
 
@@ -110,9 +137,9 @@ resultlist=[]
 minIndex=-1
 
 i=0
-alluserCount=[0,1,1]
+alluserCount=[1,1,1]
 alltop=[0,0,0]
-allPosCount=[0,1,1]
+allPosCount=[1,1,1]
 user_postiveCount=0
 while True:
     i=i+1

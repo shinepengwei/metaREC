@@ -6,7 +6,7 @@
 #include<fstream>
 #include <set>
 #include <math.h>
-
+#define TOPNN 80
 FriendRecAAENT::FriendRecAAENT(Socialnet* socNet):BasedRecommend(socNet)
 {
 
@@ -66,12 +66,12 @@ void FriendRecAAENT::Recommend(string friendData2FileName){
     map<int,float> * recResult = NULL;//针对用户i的推荐结果，其中第一个int表示item的id，float表示预测到的评价值
     map<int,float> sortedRec1;//Top-k个推荐结果TOPN1-5
     map<int,float> sortedRec2;//Top-k个推荐结果TOPN2-10
+    map<int,float> sortedRec3;
+    int rightRec[3]={0};//推荐正确的数量
+    int allRec[3]={0};//推荐的所有的元素数量
+    int rightCase[3]={0};//应该被推荐的数量
 
-    int rightRec[2]={0};//推荐正确的数量
-    int allRec[2]={0};//推荐的所有的元素数量
-    int rightCase[2]={0};//应该被推荐的数量
-
-    int rightRecOfUser[2] = {0};
+    int rightRecOfUser[3] = {0};
     int rightCaseOfUser=0;
 
 
@@ -98,7 +98,7 @@ void FriendRecAAENT::Recommend(string friendData2FileName){
 
         
         if(user1id!=lastUserId){//针对于一个新的用户，为其推荐TOP-K的地点
-            if (rightCaseOfUser>=TOPN2 )//|| rightRecOfUser[1]!=0)
+            if (rightCaseOfUser>=20)// || rightRecOfUser[2]!=0)
             {
                 rightRec[0]+=rightRecOfUser[0];
                 rightCase[0] += rightCaseOfUser;
@@ -107,6 +107,10 @@ void FriendRecAAENT::Recommend(string friendData2FileName){
                 rightRec[1]+=rightRecOfUser[1];
                 rightCase[1] += rightCaseOfUser;
                 allRec[1]+=TOPN2;
+
+                rightRec[2]+=rightRecOfUser[2];
+                rightCase[2] += rightCaseOfUser;
+                allRec[2]+=TOPN3;
             }
             if(allRec[0]!=0){
                 //cout<<"top-5:"<<endl;
@@ -120,12 +124,15 @@ void FriendRecAAENT::Recommend(string friendData2FileName){
                 cout<<"召回率rightRec[1]/rightCas[1]e"<<rightRec[1]<<"/"<<rightCase[1]<<" :"<<(float)rightRec[1]/rightCase[1]<<endl;
                 //cout<<"top-20:"<<endl;
                 //printMap(sortedRec3);
+                cout<<" 精确率rightRec[2]/allRec[2]："<<rightRec[2]<<"/"<<allRec[2]<<" :"<<(float)rightRec[2]/allRec[2]<<endl;
+                cout<<"召回率rightRec[2]/rightCas[2]e"<<rightRec[2]<<"/"<<rightCase[2]<<" :"<<(float)rightRec[2]/rightCase[2]<<endl;
             }
             //首先清除一些东西
 
             sortedRec1.clear();
             sortedRec2.clear();
-            for (int i=0;i<2;i++)
+            sortedRec3.clear();
+            for (int i=0;i<3;i++)
             {
                 rightRecOfUser[i]=0;
             }
@@ -141,26 +148,38 @@ void FriendRecAAENT::Recommend(string friendData2FileName){
             //选择top-k个推荐结果
             sortRecResult(sortedRec1,*recResult,TOPN1);
             sortRecResult(sortedRec2,*recResult,TOPN2);
+            sortRecResult(sortedRec3,*recResult,TOPN3);
             cout<<"排序厚的推荐结果：（位置ID，推荐度）"<<user1id<<endl;
             //printMap(sortedRec1);
 
             lastUserId=user1id;
         }
+        rightCaseOfUser++;
         //计算精确率和召回率
         //第一步统计推荐正确的数量
         if(sortedRec1.find(user2id)!=sortedRec1.end()){
             if(sortedRec1[user2id]!=-1){
+               // rightCaseOfUser++;
                 rightRecOfUser[0]++;
                 sortedRec1[user2id]=-1;
             }
         }
         if(sortedRec2.find(user2id)!=sortedRec2.end()){
             if(sortedRec2[user2id]!=-1){
+                //rightCaseOfUser++;
                 rightRecOfUser[1]++;
                 sortedRec2[user2id]=-1;
             }
         }
-        rightCaseOfUser++;
+        if(sortedRec3.find(user2id)!=sortedRec3.end()){
+            if(sortedRec3[user2id]!=-1){
+                //rightCaseOfUser++;
+                rightRecOfUser[2]++;
+                sortedRec3[user2id]=-1;
+            }
+        }
+        //rightCaseOfUser+=3;
+
     }
     //计算精确率和召回率
     cout<<"FriendRecAAENT"<<friendData2FileName<<endl;

@@ -29,7 +29,7 @@ using namespace std;
 */
 //#define INPUTADRESS "d:\\data\\input\\"
 
-#define INPUTADRESS "e:\\checkin\\"
+#define INPUTADRESS "G:\\checkin\\"
 
 //生成测试集：
 #define TRAIN_CHECKINDATA "traindata1.txt"
@@ -98,6 +98,8 @@ void main(){
           or DEBUG-11 \n\
           or 基于共同好友的好友推荐（aa_n） 12 \n  \
           or aa-ent 基于熵的好友推荐  - 15\
+          网络密度统计：  \
+         0 - 网络密度统计。  \
           "<<endl;
 
     cin>>train_test;
@@ -125,6 +127,12 @@ void main(){
 
     switch (train_test)
     {
+    case 0:{
+        cout<<"calculate network density:"<<endl;
+        checkinFileName=INPUTADRESS+pis+"allcheckin.txt";
+        friendFileName=INPUTADRESS+pis+"friends_edges.txt";
+        break;
+           }
     case 1:
         {
             train_testStr="train";
@@ -281,11 +289,18 @@ void main(){
     }else if (weightCpuType==3)
     {
         socialNet=Socialnet::createSocialnet(checkinFileName,friendFileName,WEIGHTCPUTYPE_BINARY,true,interval_hour);
+
+        
         weightCpuTypeStr="binary";
     }
 
     switch(train_test)
     {
+    case 0:{
+        socialNet->calculateUserDensity();
+        socialNet->calculateUserLocDensity();
+        break;
+        }
     case 1:
     case 2:
     case 3:

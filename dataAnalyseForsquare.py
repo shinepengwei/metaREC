@@ -12,7 +12,7 @@ loc_checkin_table=xlsfile.add_sheet('loc_checkin_count')
 user_checkin_table=xlsfile.add_sheet('user_checkin_count')
 locr_table=xlsfile.add_sheet('locr_count')
 
-f=open("J:\\checkin\\filter_allCheckinNewYork.txt",'r')
+f=open("E:\\checkin\\filter_allCheckinNewYork.txt",'r')
 
 locr={0:{0:0}}
 user_loc={0:{0:0}}
@@ -29,7 +29,7 @@ userckins={0:0}
 #第一行初始化,为位置关系等比较
 lastline=f.readline()
 arr=lastline.split(',')
-lasttime=time.mktime(strptime(arr[2],"%d/%m/20%y %H:%M:%S"))
+#lasttime=time.mktime(strptime(arr[2],"%d/%m/20%y %H:%M:%S"))
 lastuserid=arr[1]
 lastlocid=arr[3]
 

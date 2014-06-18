@@ -2,7 +2,7 @@
 #useful！！！！！
 #对测试集中的用户进行推荐，选择TOP-N的推荐结果，判断是否去过，然后去计算精确率和召回率
 #
-
+fout=open("E:\\checkin\\RecomResults.csv",'w+')
 '''
 f=open("e:\\data\\output\\gowalla_featuredata_binary_test_2hours.txt",'r')
 weight=[30.2944, 51.8266,981.3731,8.2467,159.4689,20.7453,0.2522]
@@ -35,12 +35,22 @@ f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_4hours.t
 weight=[ 46.9529,114.0446,1021.8946,230.0309,304.527,108.9359,0.1586]
 
 #no - ll
-f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_4hours.txt",'r')
-weight=[ 49.8306,125.5997,898.876,0,0,0,0.1594] 
+
 #no - ll
 f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_4hours.txt",'r')
 weight=[ 115.5997,0.7979,698.876,0,0,0,0.1594]
 
+f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_2hours_out.txt",'r')
+weight=[ 63.2296,112.7634,1060.1341,68.3289,276.8319,46.9433, 0.2135]
+
+
+f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_6hours_out.txt",'r')
+weight=[ 52.9097, 86.2892,1014.8902,59.1327,263.4105,41.3461, 0.2232]
+f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_8hours_out.txt",'r')
+weight=[ 57.1448, 102.8364,1043.7794,64.3013,267.1827,41.8514, 0.2184]
+
+f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_12hours_out.txt",'r')
+weight=[ 61.6939, 110.1502,1050.1285,70.3007,273.2311,45.8401, 0.2147]
 '''
 
 #Foursquare-ALL 
@@ -74,22 +84,13 @@ weight=[ 1.496,
 no-ll
 f=open("E:\\checkin\\result\\gowalla_featuredata_binary_test_4hours.txt",'r')
 weight=[ 12.8056,407.5661,143.2343,0,0,0,0.1044]
+
 '''
 
-##friend rec
-##Gowalla
-'''
-f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_normal_test_4hours.txt",'r')
-weight=[ 34.312,115.9688,92.7004,229.5602,25.1598,81.9283, 0.4778]
-f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_log_test_4hours.txt",'r')
-weight=[ 51.936,151.8108,46.5162,67.8026,2.2243,51.475,0.4483]
-f=open("E:\\checkin\\result\\friendREC_gowalla_featuredata_binary_test_4hours.txt",'r')
-weight=[ 35.5874,115.5123,61.8356,223.2695,66.2465,124.2166,0.4876]
-'''
-f=open("E:\\checkin\\result\\friendREC_foursquare_all_featuredata_binary_test_4hours_out.txt",'r')
-weight=[ 48.2359,389.6398,13.8099,93.8378,0.8922,13.0806, 0.5015]
 
 
+f=open("E:\\checkin\\result\\foursquare_NewYork_featuredata_binary_test_4hours.txt",'r')
+weight=[98.6072,735.3067,8.3893,0,0,0,0.1678] 
 
 def calculateResult(x1,x2,x3,x4,x5,x6):
     return x1*weight[0] + x2*weight[1] + x3*weight[2] + x4*weight[3] + x5*weight[4] + x6*weight[5] + weight[6]
@@ -112,16 +113,24 @@ def calculateResult(x1,x2,x3,x4,x5,x6):
     #return x1*-7.7742+x2*-19.6375+x3*646.011+x4*5.0097+x5*162.2821-0.1989 #normal 24小时 f=open("d:\\data\\output\\featuredata_normal_test.txt",'r')
     #return x1*-7.978+x2*-17.882+x3*839.9654-0.1882 #normal
 class Result:
-    def __init__(self,result,label):
+    def __init__(self,result,label,userId,locId):
         self.result=result
         self.label=label
+        self.userId = userId
+        self.locId = locId
     def getResult(self):
         return self.result
+    def getLocid(self):
+        return self.locId
     def getLabel(self):
         return self.label
-    def setPara(self,result,label):
+    def getUserid(self):
+        return self.userId
+    def setPara(self,result,label,userId,locId):
         self.result=result
         self.label=label
+        self.userId = userId
+        self.locId = locId
 def printlist(rlist):
     i=0
     print "Len:",len(rlist)
@@ -170,7 +179,9 @@ def calPostiveCountAtN(resultlist,N):
             i=i+1
         return posCount
                 
-            
+
+outflag = input("Please input write the result list or not: 1/0:\n")
+print(outflag)
 lastUserId=-1
 resultlist=[]
 minIndex=-1
@@ -188,6 +199,7 @@ while True:
     arr=newline.split(',');
     userId=int(arr[0])
     label=int(arr[8])
+    locId = int(arr[1])
     if userId!=lastUserId:#deal with new user, calculate the last User's result 新用户
         #TODO calculate recommendation result based on resultlist
         if lastUserId!=-1:#首先对上个用户结果进行整理
@@ -200,6 +212,13 @@ while True:
 
             
             if user_postiveCount >= 5 :
+                if outflag == 1:
+                    i=0
+                    print(resultlist)
+                    while i<5:
+                        fout.write(str(resultlist[i].getUserid())+","+str(resultlist[i].getLocid())+"\n")
+                        i=i+1
+                    outflag = input("Countine write the result list or not: 1/0:\n")
                 t5=calPostiveCountAtN(resultlist,5)
                 alltop[0]=alltop[0]+t5
                 alluserCount[0] = alluserCount[0] + 1
@@ -223,9 +242,7 @@ while True:
                 
             print lastUserId,":",user_postiveCount,",",t5,",",t10,",",t20
             
-            
-            
-            
+
             
             print "Precision:",float(alltop[0])/(5*alluserCount[0]),",",float(alltop[1])/(10*alluserCount[1]),",",float(alltop[2])/(20*alluserCount[2])
             print "Recall:",float(alltop[0])/(allPosCount[0]),",",float(alltop[1])/(allPosCount[1]),",",float(alltop[2])/(allPosCount[2])
@@ -239,14 +256,14 @@ while True:
 
     #处理当前的一条记录   
     if len(resultlist)<20:
-        resultlist.append(Result(calculateResult(float(arr[2]),float(arr[3]),float(arr[4]),float(arr[5]),float(arr[6]),float(arr[7])),label))
+        resultlist.append(Result(calculateResult(float(arr[2]),float(arr[3]),float(arr[4]),float(arr[5]),float(arr[6]),float(arr[7])),label,userId,locId))
         minIndex=findMinIndex(resultlist)
     else:
         re=calculateResult(float(arr[2]),float(arr[3]),float(arr[4]),float(arr[5]),float(arr[6]),float(arr[7]))
         if(re>resultlist[minIndex].getResult()):
             #printlist(resultlist)
             #print "New max Element:",re,",",arr[7],"old min MaxElement:[",minIndex,"]:",resultlist[minIndex].getResult(),",",resultlist[minIndex].getLabel()
-            resultlist[minIndex].setPara(re,label)
+            resultlist[minIndex].setPara(re,label,userId,locId)
             minIndex=findMinIndex(resultlist)
            # print "new minIndex of max Element:",minIndex
     if label==1:
